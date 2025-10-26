@@ -1,0 +1,92 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}{{ parcel_type.name|default:"Create Parcel Type" }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">{{ parcel_type.name|default:"Create Parcel Type" }}</h1>
+    </div>
+    
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert">
+                <span>&times;</span>
+            </button>
+        </div>
+        {% endfor %}
+    {% endif %}
+    
+    <div class="row">
+        <div class="col-lg-12">
+            <form action="{% url 'parcels:create' %}" method="POST">
+                {% csrf_token %}
+                {% if parcel_type.id %}
+                    <input type="hidden" name="id" value="{{ parcel_type.id }}">
+                {% endif %}
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            {{ parcel_type.id|yesno:"Edit Parcel Type,Create Parcel Type" }}
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="form-group">
+                                    <label>Title *</label>
+                                    <input type="text" class="form-control" name="name" 
+                                           placeholder="Enter title" value="{{ parcel_type.name }}" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Price</label>
+                                    <input type="text" class="form-control" name="price" 
+                                           placeholder="Enter price" value="{{ parcel_type.price|default:'' }}">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Image</label>
+                                    <input type="text" class="form-control" name="parcel_type_image" 
+                                           placeholder="Image filename" value="{{ parcel_type.image }}">
+                                    <small class="form-text text-muted">Image filename (optional)</small>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Details</label>
+                                    <textarea name="description" class="form-control" rows="5" 
+                                              placeholder="Enter description">{{ parcel_type.description }}</textarea>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Status</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="status" value="y" 
+                                               id="active" {% if parcel_type.status == 'y' %}checked{% endif %}>
+                                        <label class="form-check-label" for="active">
+                                            Active
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="status" value="n" 
+                                               id="inactive" {% if parcel_type.status != 'y' %}checked{% endif %}>
+                                        <label class="form-check-label" for="inactive">
+                                            Inactive
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                        <a href="{% url 'parcels:list' %}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

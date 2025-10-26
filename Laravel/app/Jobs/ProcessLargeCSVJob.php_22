@@ -1,0 +1,74 @@
+<?php
+
+namespace App\Jobs;
+
+use Aws\S3\S3Client;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+
+class ProcessLargeCSVJob implements ShouldQueue
+{
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    public $timeout = 3600; // 1 hour
+    public $tries = 3;
+
+    protected $key;
+
+    public function __construct($key)
+    {
+        $this->key = $key;
+    }
+
+    public function handle()
+    {
+        Log::info("Starting CSV import via LOAD DATA: {$this->key}");
+
+        $s3 = new S3Client([
+            'version' => 'latest',
+            'region'  => env('AWS_DEFAULT_REGION'),
+            'credentials' => [
+                'key'    => env('AWS_ACCESS_KEY_ID'),
+                'secret' => env('AWS_SECRET_ACCESS_KEY'),
+            ],
+        ]);
+
+        // Download CSV to temporary file
+        $result = $s3->getObject([
+            'Bucket' => env('AWS_BUCKET'),
+            'Key' => $this->key
+        ]);
+
+        $tmpFile = storage_path('app/tmp_' . uniqid() . '.csv');
+        file_put_contents($tmpFile, $result['Body']);
+
+        try {
+            // Use LOAD DATA LOCAL INFILE for fast import
+            $table = 'contacts'; // your table
+            $query = "
+                LOAD DATA LOCAL INFILE '" . addslashes($tmpFile) . "'
+                INTO TABLE {$table}
+                FIELDS TERMINATED BY ','
+                ENCLOSED BY '\"'
+                LINES TERMINATED BY '\n'
+                IGNORE 1 ROWS
+            ";
+            DB::connection()->getPdo()->exec($query);
+
+            Log::info("CSV import completed successfully: {$this->key}");
+        } catch (\Exception $e) {
+            Log::error("CSV import failed: " . $e->getMessage());
+            throw $e; // rethrow so Laravel can handle retries
+        } finally {
+            // Clean up
+            if (file_exists($tmpFile)) {
+                unlink($tmpFile);
+            }
+        }
+    }
+}

@@ -1,0 +1,2 @@
+# Contacts app package
+
