@@ -6,6 +6,12 @@ python run.py
 
 streamlit run app.py
 
+
+
+pip install -r requirements.txt
+python -m streamlit run main.py
+
+
 cd D:\durgas\appointment360-main\django
 venv\Scripts\activate
 pip install --upgrade pip setuptools wheel
@@ -51,7 +57,7 @@ python import_standardizer.py . --dry-run
 run.bat
 # Installation Commands
 pip install -r requirements.txt
-python -m streamlit run app.py
+python -m streamlit run main.py
 
 python3 -Bc "import pathlib; [p.unlink() for p in pathlib.Path('.').rglob('*.py[co]')]"
 python3 -Bc "import pathlib; [p.rmdir() for p in pathlib.Path('.').rglob('__pycache__')]"

@@ -1,10 +1,10 @@
-Now design all pages and tabs, and components in dark-light ui, more icons and a more user-friendly modern style
+now my full project and all pages, tabs, components, buttons, input boxes, and text in dark-light ui, more icons and a more user-friendly modern style
 
 Now, add a loading screen for my project, and then create an auth flow for my project
 
 Now, create a good-looking loading page, and then a welcome page, and all auth pages
 
-and now my full project will be fully responsive in all sizes of screens
+Now my full project and all pages, tabs, components, buttons, input boxes, and text will be fully responsive on all screen sizes.
 
 
 Now implement Firebase for the auth flow and storage for my codebase
@@ -25,7 +25,7 @@ Now implement Superbase for the auth flow and storage for my codebase
 SUPABASE_URL=https://woqnlgszvkqxaqabtqfv.supabase.co
 SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvcW5sZ3N6dmtxeGFxYWJ0cWZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEzMTM4ODYsImV4cCI6MjA3Njg4OTg4Nn0.DpePQML323-gdbbPxidrq-up8PXeBdXlG_8AtcIMW0o
 
-Now check all files in my codebase and break all files into components, utilities, services, etc
+Now check all files in my codebase and break all files into pages, components, utilities, services, hooks, contexts, etc
 
 
 
