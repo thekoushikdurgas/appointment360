@@ -43,7 +43,7 @@
     </button>
     <div class="wrapper d-flex">
         <!-- Sidebar -->
-        {% include 'components/sidebar.html' %}
+        {% block sidebar %}{% include 'components/sidebar.html' %}{% endblock %}
         
         <!-- Main Content -->
         <div class="main-content flex-grow-1">
