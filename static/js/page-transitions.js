@@ -72,9 +72,8 @@
             const overlay = document.createElement('div');
             overlay.className = 'page-loading-overlay';
             overlay.innerHTML = `
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
+                <div class="spinner-border text-primary" aria-hidden="true"></div>
+                <span class="sr-only" role="status" aria-live="polite">Loading…</span>
             `;
             document.body.appendChild(overlay);
         },
@@ -143,11 +142,15 @@
             justify-content: center;
             z-index: 9999;
             transition: opacity 0.3s ease;
+            padding: max(0px, env(safe-area-inset-top))
+                     max(0px, env(safe-area-inset-right))
+                     max(0px, env(safe-area-inset-bottom))
+                     max(0px, env(safe-area-inset-left));
         }
         
         .spinner-border {
-            width: 3rem;
-            height: 3rem;
+            width: clamp(2rem, 4vw, 3rem);
+            height: clamp(2rem, 4vw, 3rem);
         }
         
         @keyframes fadeIn {

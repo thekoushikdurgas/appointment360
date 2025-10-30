@@ -1,3 +1,29 @@
+/* Short-height portrait compression */
+@media (max-height: 700px) {
+    .loading-content { gap: 0.875rem; }
+    .brand-name { font-size: clamp(1.1rem, 3.6vw, 1.9rem); }
+    .brand-tagline { font-size: clamp(0.8rem, 2.2vw, 0.95rem); }
+    .logo-spinner-wrapper { width: clamp(52px, 14vw, 108px); height: clamp(52px, 14vw, 108px); }
+    .ring-1 { width: clamp(52px, 14vw, 108px); height: clamp(52px, 14vw, 108px); }
+    .ring-2 { width: clamp(44px, 12vw, 96px); height: clamp(44px, 12vw, 96px); }
+    .ring-3 { width: clamp(38px, 10vw, 88px); height: clamp(38px, 10vw, 88px); }
+    .logo-icon-wrapper { width: clamp(32px, 8vw, 62px); height: clamp(32px, 8vw, 62px); }
+    .progress-section { max-height: 46vh; }
+    .feature-preview { display: none; }
+}
+
+@media (max-height: 600px) {
+    .loading-content { gap: 0.75rem; }
+    .brand-name { font-size: clamp(1rem, 3.2vw, 1.7rem); }
+    .brand-tagline { font-size: clamp(0.75rem, 2vw, 0.9rem); }
+    .progress-section { max-height: 42vh; }
+}
+
+@media (max-height: 500px) {
+    .brand-tagline { display: none; }
+    .feature-preview { display: none !important; }
+    .progress-section { max-height: 38vh; }
+}
 /**
  * Loading Page CSS
  * Modern, responsive loading page with dark-light theme support
@@ -11,7 +37,10 @@
     margin: 0;
     padding: 0;
     overflow: hidden;
+    height: 100dvh;
+    height: 100svh;
     height: 100vh;
+    min-height: -webkit-fill-available;
     width: 100vw;
     position: relative;
     background-color: var(--bg, #ffffff);
@@ -24,13 +53,19 @@
 .loading-page {
     position: relative;
     width: 100%;
+    height: 100dvh;
+    height: 100svh;
     height: 100vh;
+    min-height: -webkit-fill-available;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    padding: 1rem;
+    padding: max(1rem, env(safe-area-inset-top))
+             max(1rem, env(safe-area-inset-right))
+             max(1rem, env(safe-area-inset-bottom))
+             max(1rem, env(safe-area-inset-left));
     box-sizing: border-box;
 }
 
@@ -349,12 +384,14 @@
     z-index: 2;
     width: 100%;
     max-width: 800px;
+    max-height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 2rem;
+    gap: 1.25rem;
     animation: fadeIn 0.8s ease-in;
     backdrop-filter: blur(0px);
+    overflow: hidden;
 }
 
 /* Glassmorphism effect for content container */
@@ -371,6 +408,7 @@
     z-index: -1;
     opacity: 0;
     transition: opacity 0.5s ease;
+    pointer-events: none;
 }
 
 .theme-dark .loading-content::before {
@@ -394,8 +432,8 @@
 
 .logo-spinner-wrapper {
     position: relative;
-    width: 120px;
-    height: 120px;
+    width: clamp(56px, 16vw, 120px);
+    height: clamp(56px, 16vw, 120px);
     margin: 0 auto;
 }
 
@@ -417,22 +455,22 @@
 }
 
 .ring-1 {
-    width: 120px;
-    height: 120px;
+    width: clamp(56px, 16vw, 120px);
+    height: clamp(56px, 16vw, 120px);
     animation-duration: 2s;
 }
 
 .ring-2 {
-    width: 100px;
-    height: 100px;
+    width: clamp(48px, 13vw, 108px);
+    height: clamp(48px, 13vw, 108px);
     border-top-color: var(--success, #22c55e);
     animation-duration: 1.5s;
     animation-direction: reverse;
 }
 
 .ring-3 {
-    width: 80px;
-    height: 80px;
+    width: clamp(42px, 10vw, 92px);
+    height: clamp(42px, 10vw, 92px);
     border-top-color: var(--warning, #f59e0b);
     animation-duration: 1s;
 }
@@ -448,8 +486,8 @@
 
 .logo-icon-wrapper {
     position: absolute;
-    width: 70px;
-    height: 70px;
+    width: clamp(36px, 9vw, 70px);
+    height: clamp(36px, 9vw, 70px);
     background: linear-gradient(135deg, var(--primary, #6366f1), var(--success, #22c55e));
     border-radius: 50%;
     display: flex;
@@ -464,7 +502,7 @@
 }
 
 .logo-icon {
-    font-size: 2rem;
+    font-size: clamp(1rem, 4vw, 2.25rem);
     color: white;
     animation: iconBounce 2s ease-in-out infinite;
 }
@@ -515,7 +553,7 @@
 
 .brand-name {
     margin: 0;
-    font-size: 2.75rem;
+    font-size: clamp(1.25rem, 4vw, 2.75rem);
     font-weight: 800;
     background: linear-gradient(135deg, 
         var(--primary, #6366f1) 0%,
@@ -549,7 +587,7 @@
 }
 
 .brand-icon {
-    font-size: 2rem;
+    font-size: clamp(1.25rem, 4vw, 2rem);
     animation: iconRotate 3s ease-in-out infinite;
 }
 
@@ -563,8 +601,8 @@
 }
 
 .brand-tagline {
-    margin: 0.75rem 0 0 0;
-    font-size: 1.15rem;
+    margin: 0.5rem 0 0 0;
+    font-size: clamp(0.85rem, 2.5vw, 1.05rem);
     color: var(--muted, #475569);
     font-weight: 500;
     display: inline-flex;
@@ -599,8 +637,10 @@
 
 .progress-section {
     width: 100%;
-    max-width: 600px;
+    max-width: 560px;
     animation: fadeIn 1s ease-out 0.6s both;
+    max-height: 52vh;
+    overflow: hidden;
 }
 
 .progress-steps {
@@ -613,8 +653,8 @@
 .progress-step {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    padding: 1rem 1.5rem;
+    gap: 0.75rem;
+    padding: 0.875rem 1.25rem;
     background: rgba(248, 250, 252, 0.7);
     backdrop-filter: blur(10px) saturate(180%);
     border: 1px solid rgba(229, 231, 235, 0.5);
@@ -701,8 +741,8 @@
 }
 
 .step-icon-wrapper {
-    width: 40px;
-    height: 40px;
+    width: clamp(24px, 5.5vw, 40px);
+    height: clamp(24px, 5.5vw, 40px);
     border-radius: 50%;
     background: linear-gradient(135deg, var(--primary, #6366f1), rgba(99, 102, 241, 0.7));
     display: flex;
@@ -722,7 +762,7 @@
 
 .step-icon {
     color: white;
-    font-size: 1.25rem;
+    font-size: clamp(0.8rem, 3.2vw, 1.15rem);
 }
 
 .step-content {
@@ -792,7 +832,7 @@
 .progress-bar-wrapper {
     position: relative;
     width: 100%;
-    height: 10px;
+    height: clamp(5px, 1.2vw, 9px);
     background: rgba(229, 231, 235, 0.4);
     backdrop-filter: blur(8px);
     border-radius: 12px;
@@ -1080,8 +1120,8 @@
     position: fixed;
     bottom: 2rem;
     right: 2rem;
-    width: 56px;
-    height: 56px;
+    width: clamp(40px, 10vw, 56px);
+    height: clamp(40px, 10vw, 56px);
     border-radius: 50%;
     background: rgba(248, 250, 252, 0.8);
     backdrop-filter: blur(12px) saturate(180%);
@@ -1142,7 +1182,7 @@
 .theme-icon-sun,
 .theme-icon-moon {
     position: absolute;
-    font-size: 1.5rem;
+    font-size: clamp(1.1rem, 3.5vw, 1.5rem);
     transition: all 0.3s ease;
 }
 
@@ -1449,6 +1489,8 @@
     .feature-preview {
         grid-template-columns: 1fr;
         gap: 0.625rem;
+        max-height: 20vh;
+        overflow: hidden;
     }
     
     .skeleton-card {
@@ -1466,7 +1508,13 @@
     
     .floating-icon {
         font-size: 1.25rem;
+        opacity: 0.04;
     }
+    /* Hide non-essential decorative icons to reduce clutter */
+    .icon-7, .icon-8, .icon-11, .icon-12, .icon-13, .icon-15 { display: none; }
+    /* Reduce particle prominence on very small screens */
+    .particles-container .particle { opacity: 0.2; filter: blur(1px); }
+    .particle-5, .particle-6, .particle-7, .particle-8 { display: none; }
     
     .icon-1, .icon-2, .icon-3, .icon-4, .icon-5, .icon-6 {
         opacity: 0.05;
@@ -1554,29 +1602,26 @@
 
 /* Landscape Orientation */
 @media (orientation: landscape) and (max-height: 600px) {
-    .loading-content {
-        gap: 0.75rem;
-        max-width: 90%;
-    }
+    .loading-content { gap: 0.6rem; max-width: 92%; max-height: 100%; }
     
     .logo-spinner-wrapper {
-        width: 70px;
-        height: 70px;
+        width: 64px;
+        height: 64px;
     }
     
     .ring-1 {
-        width: 70px;
-        height: 70px;
+        width: 64px;
+        height: 64px;
     }
     
     .ring-2 {
-        width: 60px;
-        height: 60px;
+        width: 54px;
+        height: 54px;
     }
     
     .ring-3 {
-        width: 50px;
-        height: 50px;
+        width: 46px;
+        height: 46px;
     }
     
     .logo-icon-wrapper {
@@ -1628,6 +1673,9 @@
     .feature-preview {
         display: none;
     }
+    /* Tone down decorations in cramped landscape */
+    .floating-icon { opacity: 0.05; }
+    .particles-container .particle { opacity: 0.15; }
     
     .theme-toggle-loading {
         width: 44px;

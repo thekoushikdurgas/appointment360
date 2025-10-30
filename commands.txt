@@ -52,6 +52,14 @@ python manage.py createsuperuser
 
 
 
+plink -i D:\durgas\Linkedin-main\keys\koushik.ppk ubuntu@52.66.203.234
+
+
+puttygen D:\durgas\Linkedin-main\keys\koushik.ppk -O private-openssh -o D:\durgas\Linkedin-main\keys\koushik.pem
+
+ssh -i "D:\durgas\Linkedin-main\keys\koushikpem" -o IdentitiesOnly=yes ubuntu@52.66.203.234
+
+
 venv\Scripts\activate
 python manage.py migrate
 python manage.py makemigrations 

@@ -50,6 +50,17 @@ def login_view(request):
 @require_http_methods(["POST", "GET"])
 def logout_view(request):
     """Logout view - properly clear Supabase session"""
+    # Sign out from Supabase (best-effort)
+    try:
+        if settings.SUPABASE_URL and settings.SUPABASE_ANON_KEY:
+            supabase = create_client(settings.SUPABASE_URL, settings.SUPABASE_ANON_KEY)
+            access = request.session.get('supabase_access_token')
+            refresh = request.session.get('supabase_refresh_token')
+            if access and refresh:
+                supabase.auth.set_session(access, refresh)
+            supabase.auth.sign_out()
+    except Exception as e:
+        logger.warning(f"Supabase sign out failed: {e}")
     # Clear Supabase session tokens
     if 'supabase_access_token' in request.session:
         del request.session['supabase_access_token']

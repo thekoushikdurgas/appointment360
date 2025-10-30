@@ -118,7 +118,7 @@
             </div>
             
             <!-- Progress Section -->
-            <div class="progress-section">
+            <div class="progress-section" role="status" aria-live="polite">
                 <!-- Progress Steps with Icons -->
                 <div class="progress-steps">
                     <div class="progress-step" id="step1">
@@ -168,17 +168,17 @@
                 
                 <!-- Main Progress Bar -->
                 <div class="progress-bar-container">
-                    <div class="progress-bar-wrapper">
+                    <div class="progress-bar-wrapper" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Loading progress">
                         <div class="progress-bar-fill" id="progressBar"></div>
                         <div class="progress-bar-shine"></div>
                     </div>
                     <div class="progress-percentage">
-                        <span id="progressPercent">0</span>%
+                        <span class="sr-only">Loading… </span><span id="progressPercent">0</span>%
                     </div>
                 </div>
             </div>
             
-            <!-- Feature Preview Cards (Skeleton) -->
+            {% comment %} <!-- Feature Preview Cards (Skeleton) -->
             <div class="feature-preview">
                 <div class="skeleton-card card-1">
                     <div class="skeleton-icon"><i class="ri-contacts-line"></i></div>
@@ -201,7 +201,7 @@
                         <div class="skeleton-text"></div>
                     </div>
                 </div>
-            </div>
+            </div> {% endcomment %}
             
             <!-- Loading Status Text -->
             <div class="loading-status">
@@ -349,12 +349,16 @@
             progressPercent = percent;
             const progressBar = document.getElementById('progressBar');
             const progressPercentEl = document.getElementById('progressPercent');
+            const progressBarWrapper = document.querySelector('.progress-bar-wrapper');
             
             if (progressBar) {
                 progressBar.style.width = percent + '%';
             }
             if (progressPercentEl) {
                 progressPercentEl.textContent = Math.round(percent);
+            }
+            if (progressBarWrapper) {
+                progressBarWrapper.setAttribute('aria-valuenow', Math.round(percent));
             }
         }
         

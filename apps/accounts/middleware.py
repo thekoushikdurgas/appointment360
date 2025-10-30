@@ -82,13 +82,21 @@ class SupabaseAuthMiddleware(MiddlewareMixin):
                 if self.supabase:
                     # Refresh the token
                     try:
-                        response = self.supabase.auth.refresh_session(refresh_token)
+                        # Ensure auth client has the current session set
+                        self.supabase.auth.set_session(access_token, refresh_token)
+                        response = self.supabase.auth.refresh_session()
                         
-                        if response and hasattr(response, 'session'):
+                        if response and hasattr(response, 'session') and response.session:
                             # Update tokens in session
                             request.session['supabase_access_token'] = response.session.access_token
                             request.session['supabase_refresh_token'] = response.session.refresh_token
-                            request.session['supabase_token_expires_at'] = time.time() + 3600
+                            
+                            # Recompute expiry from provider if available
+                            expires_in = getattr(response.session, 'expires_in', None)
+                            if isinstance(expires_in, (int, float)) and expires_in > 0:
+                                request.session['supabase_token_expires_at'] = time.time() + max(0, expires_in - 60)
+                            else:
+                                request.session['supabase_token_expires_at'] = time.time() + 3600
                             
                             logger.info("Supabase token refreshed successfully")
                         else:

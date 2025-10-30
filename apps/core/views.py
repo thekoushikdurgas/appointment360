@@ -147,6 +147,16 @@ def progress_tracker_view(request):
     return render(request, 'core/progress_tracker.html', context)
 
 
+def chrome_devtools_manifest(request):
+    """Serve Chrome DevTools app-specific manifest to avoid 404 noise."""
+    data = {
+        "version": "1.0",
+        "description": "App-specific Chrome DevTools configuration",
+        "resources": []
+    }
+    return JsonResponse(data)
+
+
 @login_required
 def categories_api(request):
     """Get task categories as JSON"""

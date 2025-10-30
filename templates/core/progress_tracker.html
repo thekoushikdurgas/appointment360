@@ -1,3 +1,138 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Progress Tracker</title>
+    <link rel="stylesheet" href="{% static 'css/components.css' %}">
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <main class="container" style="padding: 1.5rem;">
+        <header style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1rem;">
+            <h1 style="margin: 0; font-size: 1.5rem;">Progress Tracker</h1>
+            <a href="{% url 'core:dashboard' %}" class="btn btn-primary">Back to Dashboard</a>
+        </header>
+
+        <section id="overallProgress" class="card" style="padding: 1rem; margin-bottom: 1rem;">
+            <div style="display:flex; justify-content: space-between; align-items: center; gap: 1rem;">
+                <div style="flex: 1;">
+                    <div style="height: 10px; background: var(--muted); border-radius: 6px; overflow: hidden;">
+                        <div id="overallProgressBar" style="height: 100%; width: 0%; background: linear-gradient(135deg, #22c55e, #16a34a);"></div>
+                    </div>
+                </div>
+                <strong id="overallProgressText">0%</strong>
+            </div>
+            <small id="overallCounts" class="text-muted"></small>
+        </section>
+
+        <div id="categories"></div>
+    </main>
+
+    <script>
+    (function() {
+        'use strict';
+
+        const categoriesEl = document.getElementById('categories');
+        const overallBar = document.getElementById('overallProgressBar');
+        const overallText = document.getElementById('overallProgressText');
+        const overallCounts = document.getElementById('overallCounts');
+
+        async function fetchJSON(url) {
+            const resp = await fetch(url, { credentials: 'same-origin' });
+            if (!resp.ok) throw new Error('Request failed');
+            return await resp.json();
+        }
+
+        function renderCategory(name, color, icon, tasks) {
+            const wrapper = document.createElement('section');
+            wrapper.className = 'card';
+            wrapper.style.marginBottom = '1rem';
+            wrapper.style.padding = '1rem';
+
+            const header = document.createElement('div');
+            header.style.display = 'flex';
+            header.style.alignItems = 'center';
+            header.style.gap = '0.5rem';
+            header.style.marginBottom = '0.5rem';
+            header.innerHTML = `<i class="${icon}" style="color:${color}"></i><strong>${name}</strong>`;
+
+            const list = document.createElement('div');
+            list.style.display = 'grid';
+            list.style.gap = '0.5rem';
+
+            tasks.forEach(t => {
+                const row = document.createElement('label');
+                row.style.display = 'flex';
+                row.style.alignItems = 'start';
+                row.style.gap = '0.5rem';
+
+                const cb = document.createElement('input');
+                cb.type = 'checkbox';
+                cb.checked = !!t.is_completed;
+                cb.addEventListener('change', () => toggleTask(t.id, cb.checked));
+
+                const text = document.createElement('div');
+                text.innerHTML = `<div><strong>${t.task_name}</strong></div>${t.description ? `<div class="text-muted" style="font-size: .9rem;">${t.description}</div>` : ''}`;
+
+                row.appendChild(cb);
+                row.appendChild(text);
+                list.appendChild(row);
+            });
+
+            wrapper.appendChild(header);
+            wrapper.appendChild(list);
+            categoriesEl.appendChild(wrapper);
+        }
+
+        async function toggleTask(taskId, isCompleted) {
+            try {
+                await fetch(`{% url 'core:update_task_status_api' 0 %}`.replace('/0/', `/${taskId}/`), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ is_completed: isCompleted }),
+                    credentials: 'same-origin'
+                });
+                await loadData();
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function loadData() {
+            categoriesEl.innerHTML = '';
+            const [stats, categories, tasks] = await Promise.all([
+                fetchJSON('{% url "core:progress_stats_api" %}'),
+                fetchJSON('{% url "core:categories_api" %}'),
+                fetchJSON('{% url "core:tasks_api" %}')
+            ]);
+
+            // overall
+            overallBar.style.width = `${stats.overall_progress}%`;
+            overallText.textContent = `${stats.overall_progress}%`;
+            overallCounts.textContent = `${stats.completed_tasks} of ${stats.total_tasks} tasks completed`;
+
+            // group tasks by category code
+            const tasksByCat = tasks.tasks.reduce((acc, t) => {
+                (acc[t.category] ||= []).push(t);
+                return acc;
+            }, {});
+
+            // render in the order provided by categories
+            categories.categories.forEach(cat => {
+                const name = cat.name || 'General';
+                renderCategory(name, cat.color, cat.icon, tasksByCat[cat.name] || []);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', loadData);
+    })();
+    </script>
+</body>
+</html>
+
 {% extends 'base.html' %}
 {% load static %}
 

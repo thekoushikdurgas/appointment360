@@ -128,9 +128,14 @@ class SupabaseAuthBackend(BaseBackend):
                     request.session['supabase_user_id'] = response.user.id
                     request.session['supabase_email'] = response.user.email
                     
-                    # Store token expiry timestamp
+                    # Store token expiry timestamp using provider TTL when available
                     from time import time
-                    request.session['supabase_token_expires_at'] = time() + 3600  # Default 1 hour
+                    expires_in = getattr(response.session, 'expires_in', None)
+                    if isinstance(expires_in, (int, float)) and expires_in > 0:
+                        # Refresh a bit early (buffer 60s)
+                        request.session['supabase_token_expires_at'] = time() + max(0, expires_in - 60)
+                    else:
+                        request.session['supabase_token_expires_at'] = time() + 3600  # Fallback 1 hour
                 
                 if user:
                     logger.info(f"User authenticated successfully: {email}")

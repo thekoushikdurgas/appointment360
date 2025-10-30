@@ -11,6 +11,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     # Root entry point - loading page
     path('', views.loading_view, name='home'),
+    # Well-known endpoint for Chrome DevTools (prevents 404 noise)
+    path('.well-known/appspecific/com.chrome.devtools.json', views.chrome_devtools_manifest, name='chrome_devtools_manifest'),
     # Core app URLs (includes welcome, dashboard, etc.)
     path('', include('apps.core.urls')),
     path('accounts/', include('apps.accounts.urls')),
