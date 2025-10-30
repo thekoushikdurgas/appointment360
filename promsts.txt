@@ -1,11 +1,16 @@
 now my full project and all pages, tabs, components, buttons, input boxes, and text in dark-light ui, more icons and a more user-friendly modern style
 
+Now, create a good-looking loading page for my project, and then welcome page
+
 Now, add a loading screen for my project, and then create an auth flow for my project
 
 Now, create a good-looking loading page, and then a welcome page, and all auth pages
 
 Now my full project and all pages, tabs, components, buttons, input boxes, and text will be fully responsive on all screen sizes.
 
+The loading is still loading, not going to the welcome page. What happened? This issue has occurred repeatedly. Please fix it permanently.
+
+See the image, and then, like that on the Contacts page, the Contacts table should be fully responsive on all screen sizes. Please add both a vertical scroll bar and a horizontal scroll bar.
 
 Now implement Firebase for the auth flow and storage for my codebase
 {
@@ -18,6 +23,16 @@ Now implement Firebase for the auth flow and storage for my codebase
 }
 
 So now, when the user logs in and signs up completely, create a session or cookie or local storage for the user so next time this user comes so he automatically logs in and signs up. 
+
+
+Now give me SQL code for inserting User Profiles, contacts.
+
+    "database_url": "postgresql://postgres.woqnlgszvkqxaqabtqfv:[YOUR-PASSWORD]@aws-1-ap-south-1.pooler.supabase.com:6543/postgres",
+    "database_host": "aws-1-ap-south-1.pooler.supabase.com",
+    "database_port": 6543,
+    "database_name": "postgres",
+    "database_user": "postgres.woqnlgszvkqxaqabtqfv",
+    "database_password": "njAbg1RUZSaXh8vO",
 
 
 Now implement Superbase for the auth flow and storage for my codebase
@@ -46,8 +61,6 @@ read all pages in my codebase and then thick about this app create in django pyt
 how many flows in my codebase
 
 read all flows in my codebase and then thick about this app create in django python codebase , create Progress Tracker and all Checkboxs Learn, understand, and analyse this deeply, and then break your tasks into smaller tasks so make a plan in  @flows.md 
-
-
 
 
 
@@ -230,7 +243,7 @@ export async function fetchFreeModels() {
     const response = await openai.models.list(); // GET /models [[2]]
     // Filter free models (e.g., those with ":free" suffix or price=0)
     return response.data.filter(model => 
-      model.id.includes(':free') || model.pricing?.input === 0
+      model.id.includes('a83bb7e3-efba-48f0-bba8-b512dfb8e1160
     );
   } catch (error) {
     console.error("Failed to fetch models:", error);

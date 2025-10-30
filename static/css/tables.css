@@ -1,0 +1,356 @@
+/* Table Enhancement Styles - Contact Manager */
+
+/* Base Table Styling */
+.table {
+    width: 100%;
+    margin-bottom: 0;
+    color: var(--text);
+    border-collapse: collapse;
+}
+
+.table-sm {
+    font-size: 0.875rem;
+}
+
+.table-sm th,
+.table-sm td {
+    padding: 0.5rem;
+}
+
+.table thead {
+    background: linear-gradient(135deg, #FF6B35 0%, #FF8C42 100%);
+    color: white;
+}
+
+.table thead th {
+    border: none;
+    padding: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.875rem;
+    letter-spacing: 0.5px;
+}
+
+.table tbody tr {
+    transition: all 0.3s ease;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+}
+
+.table-hover tbody tr:hover,
+.table tbody tr:hover {
+    background: var(--card);
+    transform: translateX(4px);
+    cursor: pointer;
+}
+
+.table tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+}
+
+/* Table Row Actions */
+.table-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.action-btn {
+    padding: 0.375rem 0.75rem;
+    border: none;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.875rem;
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.action-btn-edit {
+    background: #2196F3;
+    color: white;
+}
+
+.action-btn-edit:hover {
+    background: #1976D2;
+    color: white;
+}
+
+.action-btn-delete {
+    background: #dc3545;
+    color: white;
+}
+
+.action-btn-delete:hover {
+    background: #c82333;
+    color: white;
+}
+
+.action-btn-view {
+    background: #4CAF50;
+    color: white;
+}
+
+.action-btn-view:hover {
+    background: #45a049;
+    color: white;
+}
+
+/* Table Responsive Container */
+.table-responsive {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+/* Enhanced responsive scrolling */
+.table-responsive {
+    max-height: 600px;
+    overflow-y: auto;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Custom scrollbar styling for table */
+.table-responsive::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+    background: var(--border);
+    border-radius: 10px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #FF6B35 0%, #FF8C42 100%);
+    border-radius: 10px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+    background: #FF6B35;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .table-responsive {
+        max-height: 500px;
+        overflow-x: auto;
+        overflow-y: auto;
+    }
+    
+    .table {
+        min-width: 600px; /* Ensure table maintains minimum width on mobile */
+    }
+}
+
+/* Pagination Enhancement */
+.pagination {
+    margin-top: 2rem;
+}
+
+.pagination .page-item {
+    margin: 0 0.25rem;
+}
+
+.pagination .page-link {
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    color: var(--muted);
+    transition: all 0.3s ease;
+    background: var(--card);
+}
+
+.pagination .page-link:hover {
+    border-color: #FF6B35;
+    color: #FF6B35;
+    background: rgba(255, 107, 53, 0.05);
+}
+
+.pagination .page-item.active .page-link {
+    background: linear-gradient(135deg, #FF6B35 0%, #FF8C42 100%);
+    border-color: #FF6B35;
+    color: white;
+    font-weight: 600;
+}
+
+.pagination .page-item.disabled .page-link {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+}
+
+.empty-state-icon {
+    font-size: 4rem;
+    color: var(--muted);
+    margin-bottom: 1rem;
+}
+
+.empty-state-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+}
+
+.empty-state-text {
+    color: var(--muted);
+    margin-bottom: 2rem;
+}
+
+.empty-state-action {
+    margin-top: 1rem;
+}
+
+/* Loading Skeleton */
+.skeleton-row {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+}
+
+.skeleton-cell {
+    flex: 1;
+    height: 1rem;
+    background: var(--border);
+    border-radius: 4px;
+    animation: skeleton-loading 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-loading {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* Table Badges */
+.table-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.table-badge-success {
+    background: rgba(40, 167, 69, 0.1);
+    color: #28a745;
+}
+
+.table-badge-warning {
+    background: rgba(255, 193, 7, 0.1);
+    color: #ffc107;
+}
+
+.table-badge-danger {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+}
+
+.table-badge-info {
+    background: rgba(23, 162, 184, 0.1);
+    color: #17a2b8;
+}
+
+.table-badge-primary {
+    background: rgba(255, 107, 53, 0.1);
+    color: #FF6B35;
+}
+
+/* Sortable Headers */
+.table-sortable th {
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+}
+
+.table-sortable th:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.table-sortable .sort-indicator {
+    position: absolute;
+    right: 0.5rem;
+    font-size: 0.75rem;
+    opacity: 0.5;
+}
+
+.table-sortable th[data-sort="asc"] .sort-indicator::after {
+    content: '▲';
+    color: white;
+}
+
+.table-sortable th[data-sort="desc"] .sort-indicator::after {
+    content: '▼';
+    color: white;
+}
+
+/* Checkbox Selection */
+.table-checkbox {
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 2px solid #e9ecef;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.table-checkbox:checked {
+    background-color: #FF6B35;
+    border-color: #FF6B35;
+}
+
+/* Table Footer Stats */
+.table-footer {
+    background: var(--card);
+    padding: 1rem;
+    border-radius: 0 0 8px 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 2px solid var(--border);
+}
+
+.table-footer-info {
+    color: var(--muted);
+    font-size: 0.875rem;
+}
+
+.table-footer-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .table-actions {
+        flex-direction: column;
+    }
+    
+    .action-btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .table-footer {
+        flex-direction: column;
+        gap: 1rem;
+    }
+}
+

@@ -1,0 +1,350 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Import Progress - Contact Manager{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/loading.css' %}">
+<link rel="stylesheet" href="{% static 'css/animations.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="text-white mb-2">
+                    <i class="fas fa-tasks"></i> Import Progress
+                </h1>
+                <p class="text-white-50 mb-0">Processing {{ job.filename }}</p>
+            </div>
+            <div class="col-md-4 text-end">
+                {% if job.status == 'COMPLETED' %}
+                <a href="{% url 'contacts:list' %}" class="btn btn-light btn-lg">
+                    <i class="fas fa-users"></i> View Contacts
+                </a>
+                {% elif not job.is_complete %}
+                <button class="btn btn-danger btn-lg" @click="cancelJob()" :disabled="isCancelling">
+                    <i class="fas fa-stop-circle" :class="{'fa-spin': isCancelling}"></i> 
+                    <span x-text="isCancelling ? 'Cancelling...' : 'Cancel'"></span>
+                </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid mt-4" x-data="progressTracker({{ job.id }})">
+    <!-- Job Information -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h4 class="card-title mb-3">
+                        <i class="fas fa-file-csv text-primary me-2"></i>
+                        {{ job.filename }}
+                    </h4>
+                    
+                    <!-- Status Badge -->
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="badge fs-6 me-3" 
+                              :class="{
+                                  'bg-success': jobData.status === 'COMPLETED',
+                                  'bg-danger': jobData.status === 'FAILED',
+                                  'bg-warning': jobData.status === 'PROCESSING',
+                                  'bg-secondary': jobData.status === 'PENDING'
+                              }">
+                            <i class="fas me-1" 
+                               :class="{
+                                   'fa-check-circle': jobData.status === 'COMPLETED',
+                                   'fa-times-circle': jobData.status === 'FAILED',
+                                   'fa-spinner fa-spin': jobData.status === 'PROCESSING',
+                                   'fa-clock': jobData.status === 'PENDING'
+                               }"></i>
+                            <span x-text="jobData.status"></span>
+                        </span>
+                        
+                        <span class="text-muted" x-show="jobData.status === 'PROCESSING'">
+                            <i class="fas fa-sync-alt fa-spin me-1"></i>
+                            Auto-refreshing every 2 seconds
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Job ID</h5>
+                    <h3 class="text-primary">#{{ job.id }}</h3>
+                    <small class="text-muted">Created: {{ job.created_at|date:"M d, Y H:i" }}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0">Import Progress</h5>
+                <span class="badge bg-primary fs-6" x-text="jobData.progress_percentage.toFixed(1) + '%'"></span>
+            </div>
+            
+            <div class="progress mb-3" style="height: 25px;">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                     role="progressbar" 
+                     :style="'width: ' + jobData.progress_percentage + '%'"
+                     :class="{
+                         'bg-success': jobData.status === 'COMPLETED',
+                         'bg-danger': jobData.status === 'FAILED',
+                         'bg-primary': jobData.status === 'PROCESSING' || jobData.status === 'PENDING'
+                     }">
+                    <span class="fw-bold" x-text="jobData.progress_percentage.toFixed(1) + '%'"></span>
+                </div>
+            </div>
+            
+            <div class="row text-center">
+                <div class="col-6">
+                    <small class="text-muted">Processed: <span x-text="jobData.processed_rows.toLocaleString()"></span> / <span x-text="jobData.total_rows.toLocaleString()"></span></small>
+                </div>
+                <div class="col-6" x-show="jobData.processing_speed > 0">
+                    <small class="text-muted">Speed: <span x-text="jobData.processing_speed.toFixed(0)"></span> rows/sec</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Metrics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card metric-card h-100" style="background: linear-gradient(135deg, #2196F3 0%, #64B5F6 100%);">
+                <div class="card-body text-white text-center py-4">
+                    <i class="fas fa-list fa-3x mb-3"></i>
+                    <h2 class="mb-1 counter-animate" x-text="jobData.total_rows.toLocaleString()"></h2>
+                    <p class="mb-0 fs-6">Total Rows</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card metric-card h-100" style="background: linear-gradient(135deg, #4CAF50 0%, #81C784 100%);">
+                <div class="card-body text-white text-center py-4">
+                    <i class="fas fa-check-circle fa-3x mb-3"></i>
+                    <h2 class="mb-1 counter-animate" x-text="jobData.success_count.toLocaleString()"></h2>
+                    <p class="mb-0 fs-6">✅ Success</p>
+                    <small x-show="jobData.total_rows > 0" x-text="'(' + (jobData.success_count / jobData.total_rows * 100).toFixed(1) + '%)'"></small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card metric-card h-100" style="background: linear-gradient(135deg, #dc3545 0%, #f5c6cb 100%);">
+                <div class="card-body text-white text-center py-4">
+                    <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
+                    <h2 class="mb-1 counter-animate" x-text="jobData.error_count.toLocaleString()"></h2>
+                    <p class="mb-0 fs-6">❌ Errors</p>
+                    <small x-show="jobData.total_rows > 0" x-text="'(' + (jobData.error_count / jobData.total_rows * 100).toFixed(1) + '%)'"></small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card metric-card h-100" style="background: linear-gradient(135deg, #FF9800 0%, #FFB74D 100%);">
+                <div class="card-body text-white text-center py-4">
+                    <i class="fas fa-clone fa-3x mb-3"></i>
+                    <h2 class="mb-1 counter-animate" x-text="jobData.duplicate_count.toLocaleString()"></h2>
+                    <p class="mb-0 fs-6">📋 Duplicates</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Batch Information -->
+    <div class="card shadow-sm border-0 mb-4" x-show="jobData.total_batches > 0">
+        <div class="card-body">
+            <h5 class="card-title mb-3">
+                <i class="fas fa-layer-group text-primary me-2"></i>
+                Batch Processing
+            </h5>
+            
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="text-center">
+                        <h4 class="text-primary" x-text="jobData.current_batch"></h4>
+                        <small class="text-muted">Current Batch</small>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="text-center">
+                        <h4 class="text-primary" x-text="jobData.total_batches"></h4>
+                        <small class="text-muted">Total Batches</small>
+                    </div>
+                </div>
+                <div class="col-md-4" x-show="jobData.estimated_completion">
+                    <div class="text-center">
+                        <h4 class="text-primary" x-text="formatETA(jobData.estimated_completion)"></h4>
+                        <small class="text-muted">Estimated Completion</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Timeline -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <h5 class="card-title mb-3">
+                <i class="fas fa-clock text-primary me-2"></i>
+                Timeline
+            </h5>
+            
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-play-circle text-success me-2"></i>
+                        <div>
+                            <strong>Started:</strong><br>
+                            <span x-text="jobData.started_at || 'Not started'"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4" x-show="jobData.completed_at">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-stop-circle text-danger me-2"></i>
+                        <div>
+                            <strong>Completed:</strong><br>
+                            <span x-text="jobData.completed_at"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4" x-show="jobData.duration">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-hourglass-half text-info me-2"></i>
+                        <div>
+                            <strong>Duration:</strong><br>
+                            <span x-text="jobData.duration"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Completion Messages -->
+    <div x-show="jobData.status === 'COMPLETED'" class="alert alert-success border-left-success shadow-lg rounded-lg">
+        <div class="d-flex align-items-center">
+            <div class="me-3">
+                <i class="fas fa-check-circle fa-3x"></i>
+            </div>
+            <div>
+                <h5 class="alert-heading mb-2">Import Completed Successfully!</h5>
+                <p class="mb-2" x-text="jobData.success_count.toLocaleString() + ' contacts imported successfully.'"></p>
+                <div class="mt-3">
+                    <a href="{% url 'contacts:list' %}" class="btn btn-success btn-lg me-2">
+                        <i class="fas fa-users"></i> View Contacts
+                    </a>
+                    <a href="{% url 'imports:upload' %}" class="btn btn-outline-primary btn-lg">
+                        <i class="fas fa-upload"></i> Import Another
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div x-show="jobData.status === 'FAILED'" class="alert alert-danger border-left-danger shadow-lg rounded-lg">
+        <div class="d-flex align-items-center">
+            <div class="me-3">
+                <i class="fas fa-times-circle fa-3x"></i>
+            </div>
+            <div>
+                <h5 class="alert-heading mb-2">Import Failed</h5>
+                <p class="mb-2" x-text="'Error: ' + (jobData.error_log || 'Unknown error')"></p>
+                <div class="mt-3">
+                    <a href="{% url 'imports:upload' %}" class="btn btn-danger btn-lg">
+                        <i class="fas fa-redo"></i> Try Again
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Jobs Section (fallback) -->
+<div class="container-fluid mt-4" x-show="!jobId">
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+            <h5 class="card-title mb-3">
+                <i class="fas fa-history text-primary me-2"></i>
+                Recent Import Jobs
+            </h5>
+            
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Job ID</th>
+                            <th>Filename</th>
+                            <th>Status</th>
+                            <th>Progress</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr x-show="recentJobs.length === 0">
+                            <td colspan="6" class="text-center text-muted">No recent jobs found</td>
+                        </tr>
+                        <template x-for="job in recentJobs" :key="job.id">
+                            <tr>
+                                <td><span class="badge bg-secondary">#<span x-text="job.id"></span></span></td>
+                                <td x-text="job.filename"></td>
+                                <td>
+                                    <span class="badge" 
+                                          :class="{
+                                              'bg-success': job.status === 'COMPLETED',
+                                              'bg-danger': job.status === 'FAILED',
+                                              'bg-warning': job.status === 'PROCESSING',
+                                              'bg-secondary': job.status === 'PENDING'
+                                          }"
+                                          x-text="job.status"></span>
+                                </td>
+                                <td>
+                                    <div class="progress" style="height: 20px; width: 100px;">
+                                        <div class="progress-bar" 
+                                             :style="'width: ' + job.progress_percentage + '%'"
+                                             :class="{
+                                                 'bg-success': job.status === 'COMPLETED',
+                                                 'bg-danger': job.status === 'FAILED',
+                                                 'bg-primary': job.status === 'PROCESSING' || job.status === 'PENDING'
+                                             }">
+                                        </div>
+                                    </div>
+                                    <small class="text-muted" x-text="job.progress_percentage.toFixed(1) + '%'"></small>
+                                </td>
+                                <td x-text="job.created_at"></td>
+                                <td>
+                                    <a :href="'/imports/progress/' + job.id + '/'" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/import-progress.js' %}"></script>
+<script>
+// Initialize progress tracker
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof Alpine !== 'undefined') {
+        Alpine.data('progressTracker', progressTracker);
+    }
+});
+</script>
+{% endblock %}

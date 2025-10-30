@@ -1,0 +1,126 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Contact Manager{% endblock %}</title>
+    
+    <!-- Icon Libraries -->
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Remix Icon -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Heroicons -->
+    <script src="https://unpkg.com/@heroicons/react@2.0.18/dist/index.umd.js"></script>
+    
+    <!-- DataTables CSS (custom styled) -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+    
+    <!-- Custom CSS System -->
+    <link rel="stylesheet" href="{% static 'css/theme.css' %}">
+    <link rel="stylesheet" href="{% static 'css/grid-system.css' %}">
+    <link rel="stylesheet" href="{% static 'css/components.css' %}">
+    <link rel="stylesheet" href="{% static 'css/icons.css' %}">
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}">
+    <link rel="stylesheet" href="{% static 'css/tables.css' %}">
+    <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+    <link rel="stylesheet" href="{% static 'css/loading.css' %}">
+    <link rel="stylesheet" href="{% static 'css/animations.css' %}">
+    <link rel="stylesheet" href="{% static 'css/tooltips.css' %}">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body data-user-authenticated="{% if user.is_authenticated %}true{% else %}false{% endif %}">
+    <!-- Theme Toggle -->
+    <button id="theme-toggle" class="position-fixed btn btn-primary d-flex align-items-center gap-2" aria-label="Toggle theme">
+        <i class="ri-sun-line d-none" id="icon-sun"></i>
+        <i class="ri-moon-line" id="icon-moon"></i>
+        <span class="d-none d-sm-inline">Theme</span>
+    </button>
+    <div class="wrapper d-flex">
+        <!-- Sidebar -->
+        {% include 'components/sidebar.html' %}
+        
+        <!-- Main Content -->
+        <div class="main-content flex-grow-1">
+            <!-- Messages -->
+            {% if messages %}
+                <div class="container-fluid mt-2">
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" onclick="this.parentElement.remove()" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            <!-- Page Content -->
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    
+    <!-- Initialize Lucide Icons -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        });
+    </script>
+    
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <!-- Alpine.js Components -->
+    <script src="{% static 'js/alpine-components.js' %}"></script>
+    
+    <!-- Utilities -->
+    <script src="{% static 'js/utils.js' %}"></script>
+    
+    <!-- Real-time Updates -->
+    <script src="{% static 'js/sse-manager.js' %}"></script>
+    
+    <!-- Polling Manager -->
+    <script src="{% static 'js/polling-manager.js' %}"></script>
+    
+    <!-- Custom JS -->
+    <script src="{% static 'js/modal.js' %}"></script>
+    <script src="{% static 'js/dropdown.js' %}"></script>
+    <script src="{% static 'js/tabs.js' %}"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/page-transitions.js' %}"></script>
+    <script src="{% static 'js/form-validation.js' %}"></script>
+    <script src="{% static 'js/theme-toggle.js' %}"></script>
+    
+    <!-- Global Alpine.js Components Registration -->
+    <script>
+        document.addEventListener('alpine:init', () => {
+            // Register all Alpine.js components globally
+            Alpine.data('toastNotification', window.AlpineComponents.toastNotification);
+            Alpine.data('loadingSpinner', window.AlpineComponents.loadingSpinner);
+            Alpine.data('modalComponent', window.AlpineComponents.modalComponent);
+            Alpine.data('formValidation', window.AlpineComponents.formValidation);
+            Alpine.data('dataTable', window.AlpineComponents.dataTable);
+            Alpine.data('fileUpload', window.AlpineComponents.fileUpload);
+            Alpine.data('progressBar', window.AlpineComponents.progressBar);
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
+

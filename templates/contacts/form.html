@@ -1,0 +1,333 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ action }} Contact - Contact Manager{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="text-white mb-2">
+                    <i class="ri-user-edit-line"></i> {{ action }} Contact
+                </h1>
+                <p class="text-white-50 mb-0">
+                    {% if action == 'Create' %}
+                        Add a new contact to your database
+                    {% else %}
+                        Update contact information
+                    {% endif %}
+                </p>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="{% url 'contacts:list' %}" class="btn btn-light btn-lg">
+                    <i class="ri-arrow-left-line"></i> Back to Contacts
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="ri-id-card-line"></i> Contact Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" onclick="this.parentElement.remove()" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                    
+                    <form method="post" id="contactForm">
+                        {% csrf_token %}
+                        
+                        <!-- Personal Information Section -->
+                        <div class="form-section">
+                            <h6 class="form-section-title">
+                                <i class="ri-user-line"></i> Personal Information
+                            </h6>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="text" name="first_name" id="first_name" 
+                                               class="form-control{% if form.first_name.errors %} is-invalid{% endif %}" 
+                                               placeholder="First Name" 
+                                               value="{{ form.first_name.value|default:'' }}" required>
+                                            <label for="first_name">
+                                                <i class="ri-user-line"></i> First Name <span class="required-indicator">*</span>
+                                        </label>
+                                    </div>
+                                    {% if form.first_name.errors %}
+                                        <div class="invalid-feedback d-block">{{ form.first_name.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="text" name="last_name" id="last_name" 
+                                               class="form-control{% if form.last_name.errors %} is-invalid{% endif %}" 
+                                               placeholder="Last Name" 
+                                               value="{{ form.last_name.value|default:'' }}">
+                                            <label for="last_name">
+                                                <i class="ri-user-line"></i> Last Name
+                                        </label>
+                                    </div>
+                                    {% if form.last_name.errors %}
+                                        <div class="invalid-feedback d-block">{{ form.last_name.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="email" name="email" id="email" 
+                                               class="form-control{% if form.email.errors %} is-invalid{% endif %}" 
+                                               placeholder="Email" 
+                                               value="{{ form.email.value|default:'' }}" required>
+                                        <label for="email">
+                                            <i class="ri-mail-line"></i> Email <span class="required-indicator">*</span>
+                                        </label>
+                                    </div>
+                                    {% if form.email.errors %}
+                                        <div class="invalid-feedback d-block">{{ form.email.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="tel" name="phone" id="phone" 
+                                               class="form-control{% if form.phone.errors %} is-invalid{% endif %}" 
+                                               placeholder="Phone" 
+                                               value="{{ form.phone.value|default:'' }}">
+                                        <label for="phone">
+                                            <i class="ri-phone-line"></i> Phone
+                                        </label>
+                                    </div>
+                                    {% if form.phone.errors %}
+                                        <div class="invalid-feedback d-block">{{ form.phone.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Professional Information Section -->
+                        <div class="form-section">
+                            <h6 class="form-section-title">
+                                <i class="ri-briefcase-2-line"></i> Professional Information
+                            </h6>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="text" name="company" id="company" 
+                                               class="form-control" 
+                                               placeholder="Company" 
+                                               value="{{ form.company.value|default:'' }}">
+                                        <label for="company">
+                                            <i class="ri-building-line"></i> Company
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="text" name="title" id="title" 
+                                               class="form-control" 
+                                               placeholder="Job Title" 
+                                               value="{{ form.title.value|default:'' }}">
+                                        <label for="title">
+                                            <i class="ri-user-2-line"></i> Job Title
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="text" name="industry" id="industry" 
+                                               class="form-control" 
+                                               placeholder="Industry" 
+                                               value="{{ form.industry.value|default:'' }}">
+                                        <label for="industry">
+                                            <i class="ri-factory-line"></i> Industry
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="url" name="website" id="website" 
+                                               class="form-control" 
+                                               placeholder="Website" 
+                                               value="{{ form.website.value|default:'' }}">
+                                        <label for="website">
+                                            <i class="ri-global-line"></i> Website
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Location Information Section -->
+                        <div class="form-section">
+                            <h6 class="form-section-title">
+                                <i class="ri-map-pin-line"></i> Location Information
+                            </h6>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <div class="form-floating">
+                                        <input type="text" name="city" id="city" 
+                                               class="form-control" 
+                                               placeholder="City" 
+                                               value="{{ form.city.value|default:'' }}">
+                                        <label for="city">
+                                            <i class="ri-building-2-line"></i> City
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-floating">
+                                        <input type="text" name="state" id="state" 
+                                               class="form-control" 
+                                               placeholder="State" 
+                                               value="{{ form.state.value|default:'' }}">
+                                        <label for="state">
+                                            <i class="ri-map-2-line"></i> State
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-floating">
+                                        <input type="text" name="country" id="country" 
+                                               class="form-control" 
+                                               placeholder="Country" 
+                                               value="{{ form.country.value|default:'' }}">
+                                        <label for="country">
+                                            <i class="ri-flag-2-line"></i> Country
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Additional Information Section -->
+                        <div class="form-section">
+                            <h6 class="form-section-title">
+                                <i class="ri-links-line"></i> Additional Information
+                            </h6>
+                            
+                            <div class="mb-3">
+                                <div class="form-floating">
+                                    <input type="url" name="linkedin" id="linkedin" 
+                                           class="form-control" 
+                                           placeholder="LinkedIn URL" 
+                                           value="{{ form.linkedin.value|default:'' }}">
+                                    <label for="linkedin">
+                                        <i class="ri-linkedin-box-line"></i> LinkedIn URL
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-floating">
+                                    <textarea name="notes" id="notes" 
+                                              class="form-control" 
+                                              placeholder="Notes" 
+                                              style="height: 120px;">{{ form.notes.value|default:'' }}</textarea>
+                                    <label for="notes">
+                                        <i class="ri-sticky-note-line"></i> Notes
+                                    </label>
+                                    <div class="char-counter" id="notes-counter">0 characters</div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3 form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="is_active" id="is_active" 
+                                       {% if form.is_active.value or not form.is_active.value %}checked{% endif %}>
+                                <label class="form-check-label" for="is_active">
+                                    <i class="ri-checkbox-circle-line"></i> Active Contact
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Form Actions -->
+                        <div class="form-actions">
+                            <a href="{% url 'contacts:list' %}" class="btn btn-outline-secondary">
+                                <i class="ri-close-line"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-auth-primary">
+                                <i class="ri-save-3-line"></i> Save Contact
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Character counter for notes field
+    const notesField = document.getElementById('notes');
+    const notesCounter = document.getElementById('notes-counter');
+    
+    if (notesField && notesCounter) {
+        function updateCounter() {
+            const length = notesField.value.length;
+            notesCounter.textContent = `${length} characters`;
+            
+            if (length > 500) {
+                notesCounter.classList.add('danger');
+            } else if (length > 300) {
+                notesCounter.classList.add('warning');
+            } else {
+                notesCounter.classList.remove('danger', 'warning');
+            }
+        }
+        
+        notesField.addEventListener('input', updateCounter);
+        updateCounter();
+    }
+    
+    // Form submission loading state
+    const form = document.getElementById('contactForm');
+    if (form) {
+        form.addEventListener('submit', function() {
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.classList.add('loading');
+            }
+        });
+    }
+    
+    // Real-time email validation
+    const emailField = document.getElementById('email');
+    if (emailField) {
+        emailField.addEventListener('blur', function() {
+            const email = this.value;
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            
+            if (email && !emailRegex.test(email)) {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

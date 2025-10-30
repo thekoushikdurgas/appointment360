@@ -1,0 +1,41 @@
+<!-- Metric Card Component -->
+<div class="metric-card" style="background: linear-gradient(135deg, {{ gradient_from }} 0%, {{ gradient_to }} 100%); padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+    <div class="text-center text-white">
+        <div class="metric-icon mb-2">
+            <i class="fas {{ icon }} fa-2x"></i>
+        </div>
+        <h2 class="mb-0" data-animate-counter data-target="{{ value }}">
+            0
+        </h2>
+        <p class="text-white-50 mb-0" style="opacity: 0.9;">
+            {{ label }}
+        </p>
+    </div>
+</div>
+
+<script>
+// Animate counter on load
+if (typeof dataAnimateCounter !== 'undefined') {
+    const counter = document.querySelector('[data-animate-counter]');
+    if (counter) {
+        const target = parseInt(counter.getAttribute('data-target'));
+        if (!isNaN(target)) {
+            const duration = 2000;
+            const increment = target / (duration / 16);
+            let current = 0;
+            
+            const updateCounter = () => {
+                current += increment;
+                if (current < target) {
+                    counter.textContent = Math.floor(current);
+                    requestAnimationFrame(updateCounter);
+                } else {
+                    counter.textContent = target;
+                }
+            };
+            
+            updateCounter();
+        }
+    }
+}
+</script>

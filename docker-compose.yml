@@ -3,12 +3,12 @@ version: '3.8'
 services:
   db:
     image: postgres:15
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    environment:
-      POSTGRES_DB: appointment360
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
     ports:
       - "5432:5432"
 
@@ -19,37 +19,35 @@ services:
 
   web:
     build: .
-    command: gunicorn appointment360.wsgi:application --bind 0.0.0.0:8000
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000
     volumes:
       - .:/app
       - static_volume:/app/staticfiles
       - media_volume:/app/media
     ports:
       - "8000:8000"
-    env_file:
-      - .env
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
     depends_on:
       - db
       - redis
 
   celery:
     build: .
-    command: celery -A appointment360 worker --loglevel=info
+    command: celery -A config worker -l info
     volumes:
       - .:/app
-    env_file:
-      - .env
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
     depends_on:
       - db
       - redis
 
   celery-beat:
     build: .
-    command: celery -A appointment360 beat --loglevel=info
+    command: celery -A config beat -l info
     volumes:
       - .:/app
-    env_file:
-      - .env
     depends_on:
       - db
       - redis

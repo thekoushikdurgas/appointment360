@@ -1,0 +1,343 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Export History - Contact Manager{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/loading.css' %}">
+<link rel="stylesheet" href="{% static 'css/animations.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="text-white mb-2">
+                    <i class="ri-history-line"></i> Export History
+                </h1>
+                <p class="text-white-50 mb-0">Track and manage your data exports</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <div class="btn-group" role="group">
+                    <button @click="refreshExports()" 
+                            class="btn btn-light btn-lg me-2"
+                            :disabled="isLoading">
+                        <i class="fas fa-sync-alt" :class="{'fa-spin': isLoading}"></i> Refresh
+                    </button>
+                    <button @click="showCreateExportModal()" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-plus"></i> New Export
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid mt-4" x-data="exportHistory()">
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card metric-card h-100" style="background: linear-gradient(135deg, #FF6B35 0%, #FF8C42 100%);">
+                <div class="card-body text-white text-center py-4">
+                    <i class="fas fa-download fa-3x mb-3"></i>
+                    <h2 class="mb-1 counter-animate" x-text="stats.total_exports.toLocaleString()"></h2>
+                    <p class="mb-0 fs-6">Total Exports</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card metric-card h-100" style="background: linear-gradient(135deg, #4CAF50 0%, #81C784 100%);">
+                <div class="card-body text-white text-center py-4">
+                    <i class="fas fa-check-circle fa-3x mb-3"></i>
+                    <h2 class="mb-1 counter-animate" x-text="stats.completed_exports.toLocaleString()"></h2>
+                    <p class="mb-0 fs-6">Completed</p>
+                    <small x-text="stats.success_rate + '% success rate'"></small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card metric-card h-100" style="background: linear-gradient(135deg, #2196F3 0%, #64B5F6 100%);">
+                <div class="card-body text-white text-center py-4">
+                    <i class="fas fa-database fa-3x mb-3"></i>
+                    <h2 class="mb-1 counter-animate" x-text="stats.total_records_exported.toLocaleString()"></h2>
+                    <p class="mb-0 fs-6">Records Exported</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card metric-card h-100" style="background: linear-gradient(135deg, #9C27B0 0%, #BA68C8 100%);">
+                <div class="card-body text-white text-center py-4">
+                    <i class="fas fa-hdd fa-3x mb-3"></i>
+                    <h2 class="mb-1 counter-animate" x-text="formatFileSize(stats.total_file_size)"></h2>
+                    <p class="mb-0 fs-6">Total Size</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h5 class="mb-0">
+                        <i class="fas fa-filter me-2"></i>
+                        Filter Exports
+                    </h5>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex gap-2">
+                        <select @change="applyFilters()" x-model="filters.type" class="form-select">
+                            <option value="">All Types</option>
+                            <option value="contacts">Contacts</option>
+                            <option value="bulk_export">Bulk Export</option>
+                            <option value="selected_contacts">Selected Contacts</option>
+                            <option value="analytics">Analytics</option>
+                        </select>
+                        <select @change="applyFilters()" x-model="filters.status" class="form-select">
+                            <option value="">All Status</option>
+                            <option value="pending">Pending</option>
+                            <option value="processing">Processing</option>
+                            <option value="completed">Completed</option>
+                            <option value="failed">Failed</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                        <input @change="applyFilters()" x-model="filters.search" 
+                               type="text" class="form-control" placeholder="Search...">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Actions Toolbar -->
+    <div x-show="selectedExports.length > 0" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 transform translate-y-2"
+         x-transition:enter-end="opacity-100 transform translate-y-0"
+         class="card shadow-sm border-0 mb-4">
+        <div class="card-body bg-primary text-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <span>
+                    <i class="fas fa-check-circle me-2"></i>
+                    <span x-text="selectedExports.length"></span> export(s) selected
+                </span>
+                <div class="btn-group">
+                    <button @click="bulkDeleteExports()" 
+                            class="btn btn-outline-light btn-sm"
+                            :disabled="isDeleting">
+                        <i class="fas fa-trash me-1"></i>
+                        <span x-show="!isDeleting">Delete Selected</span>
+                        <span x-show="isDeleting">Deleting...</span>
+                    </button>
+                    <button @click="clearSelection()" class="btn btn-outline-light btn-sm">
+                        <i class="fas fa-times me-1"></i> Clear Selection
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Exports Table -->
+    <div class="card shadow-lg border-0">
+        <div class="card-header bg-light py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">
+                    <i class="fas fa-list me-2"></i> Export History
+                </h4>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" 
+                           @change="toggleAllExports()" 
+                           :checked="allExportsSelected"
+                           :indeterminate="someExportsSelected">
+                    <label class="form-check-label">
+                        Select All
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th width="50">Select</th>
+                            <th>Type</th>
+                            <th>Format</th>
+                            <th>Status</th>
+                            <th>Records</th>
+                            <th>File Size</th>
+                            <th>Created</th>
+                            <th>Duration</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template x-for="export in exports" :key="export.id">
+                            <tr :class="{
+                                'table-success': export.status === 'completed',
+                                'table-warning': export.status === 'processing',
+                                'table-danger': export.status === 'failed'
+                            }">
+                                <td>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" 
+                                               :checked="isExportSelected(export.id)"
+                                               @change="toggleExportSelection(export.id)">
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info" x-text="export.export_type"></span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary" x-text="export.export_format.toUpperCase()"></span>
+                                </td>
+                                <td>
+                                    <span class="badge" 
+                                          :class="{
+                                              'bg-success': export.status === 'completed',
+                                              'bg-warning': export.status === 'processing',
+                                              'bg-danger': export.status === 'failed',
+                                              'bg-secondary': export.status === 'pending',
+                                              'bg-dark': export.status === 'cancelled'
+                                          }"
+                                          x-text="export.status"></span>
+                                    <div x-show="export.status === 'processing'" class="progress mt-1" style="height: 4px;">
+                                        <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                             :style="'width: ' + export.progress_percentage + '%'"></div>
+                                    </div>
+                                </td>
+                                <td x-text="export.record_count.toLocaleString()"></td>
+                                <td x-text="formatFileSize(export.file_size)"></td>
+                                <td x-text="formatDate(export.created_at)"></td>
+                                <td x-text="export.duration || '-'"></td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <button x-show="export.status === 'completed'" 
+                                                @click="downloadExport(export.id)"
+                                                class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                        <button x-show="export.status === 'processing'" 
+                                                @click="cancelExport(export.id)"
+                                                class="btn btn-outline-warning btn-sm">
+                                            <i class="fas fa-stop"></i>
+                                        </button>
+                                        <button @click="deleteExport(export.id)"
+                                                class="btn btn-outline-danger btn-sm">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </template>
+                        <tr x-show="exports.length === 0">
+                            <td colspan="9" class="text-center text-muted py-4">
+                                <i class="fas fa-inbox fa-3x mb-3"></i>
+                                <p>No exports found</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <nav x-show="totalPages > 1" class="mt-4">
+        <ul class="pagination justify-content-center">
+            <li class="page-item" :class="{'disabled': currentPage === 1}">
+                <button @click="changePage(currentPage - 1)" class="page-link">Previous</button>
+            </li>
+            <template x-for="page in getPageNumbers()" :key="page">
+                <li class="page-item" :class="{'active': page === currentPage}">
+                    <button @click="changePage(page)" class="page-link" x-text="page"></button>
+                </li>
+            </template>
+            <li class="page-item" :class="{'disabled': currentPage === totalPages}">
+                <button @click="changePage(currentPage + 1)" class="page-link">Next</button>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Loading State -->
+    <div x-show="isLoading" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="text-muted mt-3">Loading export history...</p>
+    </div>
+</div>
+
+<!-- Create Export Modal -->
+<div class="modal fade" id="createExportModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create New Export</h5>
+                <button type="button" class="btn-close" data-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form @submit.prevent="createExport()">
+                    <div class="mb-3">
+                        <label class="form-label">Export Type</label>
+                        <select x-model="newExport.type" class="form-select" required>
+                            <option value="">Select type...</option>
+                            <option value="contacts">All Contacts</option>
+                            <option value="bulk_export">Bulk Export</option>
+                            <option value="analytics">Analytics Data</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Export Format</label>
+                        <select x-model="newExport.format" class="form-select" required>
+                            <option value="csv">CSV</option>
+                            <option value="excel">Excel</option>
+                            <option value="json">JSON</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Filters (JSON)</label>
+                        <textarea x-model="newExport.filters" class="form-control" rows="3" 
+                                  placeholder='{"status": "active", "industry": "technology"}'></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button @click="createExport()" 
+                        class="btn btn-primary"
+                        :disabled="isCreating">
+                    <span x-show="!isCreating">Create Export</span>
+                    <span x-show="isCreating">Creating...</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.metric-card {
+    border-radius: 12px;
+    transition: transform 0.3s ease-in-out;
+}
+
+.metric-card:hover {
+    transform: translateY(-5px);
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/export-history.js' %}"></script>
+<script>
+// Initialize export history
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof Alpine !== 'undefined') {
+        Alpine.data('exportHistory', exportHistory);
+    }
+});
+</script>
+{% endblock %}

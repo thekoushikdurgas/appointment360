@@ -1,0 +1,232 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Import Contacts - Contact Manager{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="text-white mb-2">
+                    <i class="ri-upload-cloud-2-line"></i> Import Contacts
+                </h1>
+                <p class="text-white-50 mb-0">Import contacts from CSV files into your database</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="{% url 'contacts:list' %}" class="btn btn-light btn-lg">
+                    <i class="ri-arrow-left-line"></i> Back to Contacts
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid mt-4">
+    <!-- Upload Instructions -->
+    <div class="row mb-4">
+        <div class="col-md-8 mx-auto">
+            <div class="alert alert-info" style="border-left: 4px solid #2196F3;">
+                <h5><i class="fas fa-info-circle"></i> Import Instructions</h5>
+                <ul class="mb-0">
+                    <li>Upload a CSV file with contact information</li>
+                    <li>Our system will automatically detect column mappings</li>
+                    <li>Maximum file size: 10MB</li>
+                    <li>Supported formats: CSV, Excel</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- File Upload Card with Tabs -->
+    <div class="row">
+        <div class="col-md-10 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="ri-file-excel-2-line"></i> Import CSV File
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- Tabs -->
+                    <ul class="nav nav-tabs mb-4" id="importTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link active" id="upload-tab" data-toggle="tab" href="#upload" role="tab" aria-controls="upload" aria-selected="true">
+                                <i class="fas fa-upload"></i> Upload File
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" id="local-tab" data-toggle="tab" href="#local" role="tab" aria-controls="local" aria-selected="false">
+                                <i class="fas fa-folder-open"></i> Local File
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <!-- Tab Content -->
+                    <div class="tab-content" id="importTabContent">
+                        <!-- Upload Tab -->
+                        <div class="tab-pane fade show active" id="upload" role="tabpanel" aria-labelledby="upload-tab">
+                            <form method="post" enctype="multipart/form-data" id="uploadForm">
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            <label class="custom-file-upload">
+                                <input type="file" name="file" id="file" accept=".csv,.xlsx,.xls" required>
+                                <div class="d-flex flex-column align-items-center justify-content-center p-5">
+                                    <i class="fas fa-cloud-upload-alt fa-4x text-primary mb-3"></i>
+                                    <h5>Click to upload or drag and drop</h5>
+                                    <p class="text-muted mb-0">CSV, XLS, XLSX (Max 10MB)</p>
+                                </div>
+                            </label>
+                        </div>
+                        
+                        <div id="file-preview" style="display: none;">
+                            <div class="file-preview">
+                                <i class="fas fa-file-csv"></i>
+                                <div class="file-preview-info">
+                                    <div class="file-preview-name" id="preview-name"></div>
+                                    <div class="file-preview-size" id="preview-size"></div>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-danger" onclick="clearFile()">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-success mt-3" style="border-left: 4px solid #28a745;">
+                            <h6><i class="fas fa-check-circle"></i> Supported Columns:</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <small>• First Name, Last Name</small><br>
+                                    <small>• Email, Phone</small><br>
+                                    <small>• Company, Industry</small><br>
+                                    <small>• Job Title, Website</small>
+                                </div>
+                                <div class="col-md-6">
+                                    <small>• City, State, Country</small><br>
+                                    <small>• LinkedIn URL</small><br>
+                                    <small>• Notes</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-auth-primary w-100">
+                                <i class="fas fa-upload"></i> Upload and Preview
+                            </button>
+                        </div>
+                            </form>
+                        </div>
+                        
+                        <!-- Local File Tab -->
+                        <div class="tab-pane fade" id="local" role="tabpanel" aria-labelledby="local-tab">
+                            <form method="post" id="localFileForm">
+                                {% csrf_token %}
+                                
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="local_file_select" class="form-label">Select from Data Folder:</label>
+                                        {% if csv_files %}
+                                        <select class="form-select" id="local_file_select" name="local_file_path">
+                                            <option value="">-- Select a file --</option>
+                                            {% for file_path in csv_files %}
+                                            <option value="{{ file_path }}">{{ file_path|slugify }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        {% else %}
+                                        <div class="alert alert-info">
+                                            <i class="fas fa-info-circle"></i> No CSV files found in data folder
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">OR Enter Absolute Path:</label>
+                                        <input type="text" class="form-control" id="manual_path" name="local_file_path" placeholder="e.g., /path/to/file.csv">
+                                    </div>
+                                </div>
+                                
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle"></i> Make sure the file path is correct and the file is accessible
+                                </div>
+                                
+                                <div class="form-actions">
+                                    <button type="submit" class="btn btn-auth-primary w-100">
+                                        <i class="fas fa-check"></i> Load File
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.getElementById('file');
+    const previewDiv = document.getElementById('file-preview');
+    const previewName = document.getElementById('preview-name');
+    const previewSize = document.getElementById('preview-size');
+    
+    fileInput.addEventListener('change', function() {
+        if (this.files && this.files[0]) {
+            const file = this.files[0];
+            previewName.textContent = file.name;
+            
+            // Format file size
+            const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
+            previewSize.textContent = `${sizeInMB} MB`;
+            
+            previewDiv.style.display = 'block';
+            
+            // Validate file size (10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                alert('File size exceeds 10MB limit');
+                this.value = '';
+                previewDiv.style.display = 'none';
+            }
+        }
+    });
+    
+    // Drag and drop
+    const uploadArea = document.querySelector('.custom-file-upload');
+    uploadArea.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        this.style.background = 'rgba(255, 107, 53, 0.1)';
+    });
+    
+    uploadArea.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        this.style.background = '';
+    });
+    
+    uploadArea.addEventListener('drop', function(e) {
+        e.preventDefault();
+        this.style.background = '';
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            fileInput.files = files;
+            fileInput.dispatchEvent(new Event('change'));
+        }
+    });
+});
+
+function clearFile() {
+    document.getElementById('file').value = '';
+    document.getElementById('file-preview').style.display = 'none';
+}
+
+// Form submission loading
+document.getElementById('uploadForm').addEventListener('submit', function() {
+    const submitBtn = this.querySelector('button[type="submit"]');
+    submitBtn.classList.add('loading');
+    submitBtn.disabled = true;
+});
+</script>
+{% endblock %}

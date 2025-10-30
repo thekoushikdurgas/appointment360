@@ -1,0 +1,107 @@
+<!-- Sidebar Component -->
+<nav class="sidebar sidebar-offcanvas" id="sidebar">
+    <div class="sidebar-brand-wrapper d-none d-lg-flex align-items-center justify-content-center">
+        <a class="sidebar-brand brand-logo" href="{% url 'core:dashboard' %}">
+            <i class="fas fa-address-book"></i>
+            <span class="ms-2">Contact Manager</span>
+        </a>
+    </div>
+    
+    <ul class="nav">
+        <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'core:dashboard' %}">
+                <i class="fas fa-home"></i>
+                <span class="menu-title">Dashboard</span>
+            </a>
+        </li>
+        
+        <li class="nav-item">
+            <a class="nav-link {% if 'contacts' in request.resolver_match.namespace %}active{% endif %}" href="{% url 'contacts:list' %}">
+                <i class="fas fa-users"></i>
+                <span class="menu-title">Contacts</span>
+            </a>
+        </li>
+        
+        <li class="nav-item">
+            <a class="nav-link {% if 'imports' in request.resolver_match.namespace %}active{% endif %}" href="{% url 'imports:upload' %}">
+                <i class="fas fa-upload"></i>
+                <span class="menu-title">Import</span>
+            </a>
+        </li>
+        
+        <li class="nav-item">
+            <a class="nav-link {% if 'jobs' in request.resolver_match.namespace %}active{% endif %}" href="{% url 'jobs:scraper' %}">
+                <i class="fas fa-briefcase"></i>
+                <span class="menu-title">Jobs</span>
+            </a>
+        </li>
+        
+        <li class="nav-item">
+            <a class="nav-link {% if 'analytics' in request.resolver_match.namespace %}active{% endif %}" href="{% url 'analytics:dashboard' %}">
+                <i class="fas fa-chart-bar"></i>
+                <span class="menu-title">Analytics</span>
+            </a>
+        </li>
+        
+        <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'progress_tracker' %}active{% endif %}" href="{% url 'core:progress_tracker' %}">
+                <i class="fas fa-chart-line"></i>
+                <span class="menu-title">Progress Tracker</span>
+            </a>
+        </li>
+        
+        <li class="nav-item">
+            <a class="nav-link {% if 'exports' in request.resolver_match.namespace %}active{% endif %}" href="{% url 'exports:history' %}">
+                <i class="fas fa-history"></i>
+                <span class="menu-title">Export History</span>
+            </a>
+        </li>
+        
+        <li class="nav-item mt-3">
+            <div class="separator"></div>
+        </li>
+        
+        <li class="nav-item">
+            <a class="nav-link {% if 'profile' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'accounts:profile' %}">
+                <i class="fas fa-user"></i>
+                <span class="menu-title">Profile</span>
+            </a>
+        </li>
+        
+        <li class="nav-item">
+            <a class="nav-link {% if 'settings' in request.resolver_match.namespace %}active{% endif %}" href="{% url 'settings:settings' %}">
+                <i class="fas fa-cog"></i>
+                <span class="menu-title">Settings</span>
+            </a>
+        </li>
+        
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'accounts:logout' %}">
+                <i class="fas fa-sign-out-alt"></i>
+                <span class="menu-title">Logout</span>
+            </a>
+        </li>
+    </ul>
+    
+    <!-- Progress Tracker -->
+    <div class="progress-tracker mt-auto" id="progress-tracker">
+        <!-- Real-time progress will be injected here via WebSocket -->
+    </div>
+</nav>
+
+<style>
+.sidebar .nav-link.active {
+    background: linear-gradient(135deg, #FF6B35 0%, #FF8C42 100%);
+    color: white;
+    transform: translateX(5px);
+}
+
+.sidebar .nav-link.active i {
+    color: white;
+}
+
+.sidebar .nav-link.active .menu-title {
+    color: white;
+    font-weight: 600;
+}
+</style>

@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Email Verification - Contact Manager{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center align-items-center min-vh-100">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-lg border-0 rounded-lg">
+                <div class="card-header text-center py-4">
+                    <i class="ri-mail-check-line fa-3x mb-3"></i>
+                    <h3 class="mb-0">Email Verification</h3>
+                </div>
+                <div class="card-body p-5">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show rounded-lg" role="alert">
+                                <i class="{% if message.tags == 'success' %}ri-check-line{% else %}ri-alert-line{% endif %} me-2"></i>
+                                {{ message }}
+                                <button type="button" class="btn-close" onclick="this.parentElement.remove()" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center mb-4">
+                            <div class="alert alert-info rounded-lg">
+                                <i class="ri-information-line me-2"></i>
+                                <p class="mb-0">Please check your email for a verification link.</p>
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="text-center mt-4">
+                        <a href="{% url 'accounts:login' %}" class="btn btn-primary btn-lg">
+                            <i class="ri-arrow-left-line me-2"></i> Back to Login
+                        </a>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="text-center">
+                        <small class="text-muted">
+                            Didn't receive an email? 
+                            <a href="#" class="text-primary">Resend verification email</a>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.min-vh-100 {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.card {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+</style>
+{% endblock %}

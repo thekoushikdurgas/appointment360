@@ -1,188 +1,149 @@
 """
-Bulk Insert Service - Optimized database insertion for large imports
+Bulk Insert Service - Optimized database inserts for large CSV imports
+Migrated from Stremlit/services/bulk_insert_service.py
 """
-from sqlalchemy.orm import Session
-from sqlalchemy import text
-from typing import List, Dict, Optional
-from models.contact import Contact
-from pyspark.sql import DataFrame
-import json
+from typing import List, Dict, Any, Optional
 import pandas as pd
-from datetime import datetime
+from apps.contacts.models import Contact
+from services.type_converter import TypeConverter
+from services.import_error_tracker import ImportErrorTracker
 
 
 class BulkInsertService:
-    """Handle bulk inserts to database with optimized performance"""
+    """Handle bulk inserts of contacts with error tracking"""
     
-    def __init__(self, db: Session):
-        self.db = db
+    def __init__(self, db_session=None):
+        """
+        Initialize bulk insert service
+        
+        Args:
+            db_session: Django doesn't need explicit session like SQLAlchemy
+        """
+        self.error_tracker = ImportErrorTracker()
     
-    def bulk_insert_from_dataframe(self, df: DataFrame, user_id: int = 1) -> Dict:
+    def bulk_insert_from_dataframe(self, df: pd.DataFrame, user_id: str, 
+                                   column_mapping: Dict[str, str]) -> Dict[str, Any]:
         """
-        Insert records from Spark DataFrame to database
-        Returns dict with success count, error count, and errors
+        Bulk insert contacts from DataFrame
+        
+        Args:
+            df: Pandas DataFrame with contact data
+            user_id: User ID for the contacts
+            column_mapping: Mapping of CSV columns to database fields
+            
+        Returns:
+            Dictionary with success_count, error_count, and duplicate_count
         """
-        results = {
-            'success_count': 0,
-            'error_count': 0,
-            'errors': []
+        success_count = 0
+        error_count = 0
+        duplicate_count = 0
+        
+        for idx, row in df.iterrows():
+            try:
+                # Build contact data from mapping
+                contact_data = {}
+                
+                for csv_col, db_field in column_mapping.items():
+                    if csv_col in row.index:
+                        value = row[csv_col]
+                        if pd.notna(value) and str(value).strip() != '':
+                            # Use type converter to properly handle numeric fields
+                            converted_value = TypeConverter.convert_value(db_field, value)
+                            contact_data[db_field] = converted_value
+                
+                # Set user_id
+                contact_data['user_id'] = str(user_id)
+                
+                # Clean and merge names
+                contact_data = TypeConverter.clean_and_merge_names(contact_data)
+                
+                # Skip if email already exists
+                email = contact_data.get('email')
+                if email:
+                    existing = Contact.objects.filter(email=email).first()
+                    if existing:
+                        duplicate_count += 1
+                        self.error_tracker.add_duplicate_error(idx + 1, email)
+                        continue
+                
+                # Validate required fields
+                if not email:
+                    error_count += 1
+                    self.error_tracker.add_validation_error(
+                        idx + 1, 'email', contact_data.get('email'), 'Email is required'
+                    )
+                    continue
+                
+                # Create contact
+                contact = Contact(**contact_data)
+                contact.save()
+                success_count += 1
+                
+            except Exception as e:
+                error_count += 1
+                self.error_tracker.add_error(
+                    idx + 1,
+                    'unknown',
+                    f"Error: {str(e)}",
+                    str(row.to_dict())
+                )
+                continue
+        
+        return {
+            'success_count': success_count,
+            'error_count': error_count,
+            'duplicate_count': duplicate_count,
+            'total_processed': len(df)
         }
+    
+    def bulk_insert_chunked(self, df: pd.DataFrame, user_id: str, 
+                           column_mapping: Dict[str, str], 
+                           chunk_size: int = 100) -> Dict[str, Any]:
+        """
+        Bulk insert contacts in chunks with progress tracking
         
-        try:
-            # Convert to Pandas for easier iteration
-            pdf = df.toPandas()
+        Args:
+            df: Pandas DataFrame with contact data
+            user_id: User ID for the contacts
+            column_mapping: Mapping of CSV columns to database fields
+            chunk_size: Number of records to process before committing
             
-            # Prepare batch data
-            batch_size = 1000
-            total_batches = (len(pdf) + batch_size - 1) // batch_size
-            
-            for batch_idx in range(total_batches):
-                start_idx = batch_idx * batch_size
-                end_idx = min((batch_idx + 1) * batch_size, len(pdf))
-                batch = pdf.iloc[start_idx:end_idx]
-                
-                # Convert to dict list for bulk insert
-                records = []
-                for _, row in batch.iterrows():
-                    record = self._row_to_dict(row, user_id)
-                    if record:
-                        records.append(record)
-                
-                # Bulk insert this batch
-                try:
-                    self.db.bulk_insert_mappings(Contact, records)
-                    self.db.commit()
-                    results['success_count'] += len(records)
-                except Exception as e:
-                    self.db.rollback()
-                    results['error_count'] += len(records)
-                    results['errors'].append({
-                        'batch': batch_idx + 1,
-                        'error': str(e),
-                        'row_count': len(records)
-                    })
+        Returns:
+            Dictionary with success_count, error_count, duplicate_count
+        """
+        total_success = 0
+        total_error = 0
+        total_duplicate = 0
         
-        except Exception as e:
-            results['errors'].append({
-                'type': 'general',
-                'error': str(e)
-            })
+        # Process in chunks
+        for i in range(0, len(df), chunk_size):
+            chunk = df.iloc[i:i + chunk_size]
+            chunk_results = self.bulk_insert_from_dataframe(chunk, user_id, column_mapping)
+            
+            total_success += chunk_results['success_count']
+            total_error += chunk_results['error_count']
+            total_duplicate += chunk_results['duplicate_count']
         
-        return results
+        return {
+            'success_count': total_success,
+            'error_count': total_error,
+            'duplicate_count': total_duplicate,
+            'total_processed': len(df)
+        }
     
-    def _row_to_dict(self, row, user_id: int) -> Optional[Dict]:
-        """Convert DataFrame row to contact dictionary"""
-        try:
-            record = {
-                'full_name': str(row.get('full_name', '')).strip() or self._build_full_name(row),
-                'first_name': str(row.get('first_name', '')).strip(),
-                'last_name': str(row.get('last_name', '')).strip(),
-                'email': str(row.get('email', '')).strip().lower(),
-                'phone': str(row.get('phone', '')).strip(),
-                'title': str(row.get('title', '')).strip(),
-                'company': str(row.get('company', '')).strip(),
-                'industry': str(row.get('industry', '')).strip(),
-                'company_size': str(row.get('company_size', '')).strip(),
-                'company_address': str(row.get('company_address', '')).strip(),
-                'website': str(row.get('website', '')).strip(),
-                'city': str(row.get('city', '')).strip(),
-                'state': str(row.get('state', '')).strip(),
-                'country': str(row.get('country', '')).strip(),
-                'postal_code': str(row.get('postal_code', '')).strip(),
-                'company_city': str(row.get('company_city', '')).strip(),
-                'company_state': str(row.get('company_state', '')).strip(),
-                'company_country': str(row.get('company_country', '')).strip(),
-                'company_phone': str(row.get('company_phone', '')).strip(),
-                'linkedin': str(row.get('linkedin', '')).strip(),
-                'person_linkedin_url': str(row.get('person_linkedin_url', '')).strip(),
-                'company_linkedin_url': str(row.get('company_linkedin_url', '')).strip(),
-                'facebook_url': str(row.get('facebook_url', '')).strip(),
-                'twitter_url': str(row.get('twitter_url', '')).strip(),
-                'notes': str(row.get('notes', '')).strip(),
-                'tags': str(row.get('tags', '')).strip(),
-                'user_id': user_id,
-                'is_active': True,
-                'created_at': datetime.utcnow(),
-                'updated_at': datetime.utcnow()
-            }
-            
-            # Handle numeric fields
-            try:
-                record['employees_count'] = int(row.get('employees_count', 0)) if pd.notna(row.get('employees_count')) else None
-            except:
-                record['employees_count'] = None
-            
-            try:
-                record['annual_revenue'] = int(row.get('annual_revenue', 0)) if pd.notna(row.get('annual_revenue')) else None
-            except:
-                record['annual_revenue'] = None
-            
-            try:
-                record['total_funding'] = int(row.get('total_funding', 0)) if pd.notna(row.get('total_funding')) else None
-            except:
-                record['total_funding'] = None
-            
-            # Extended fields
-            record['seniority'] = str(row.get('seniority', '')).strip()
-            record['departments'] = str(row.get('departments', '')).strip()
-            record['keywords'] = str(row.get('keywords', '')).strip()
-            record['technologies'] = str(row.get('technologies', '')).strip()
-            record['email_status'] = str(row.get('email_status', '')).strip()
-            record['stage'] = str(row.get('stage', '')).strip()
-            
-            # Validate required fields
-            if not record.get('email') or not record.get('first_name'):
-                return None
-            
-            return record
-            
-        except Exception as e:
-            print(f"Error converting row to dict: {str(e)}")
-            return None
+    def get_errors(self) -> List:
+        """Get all errors from tracker"""
+        return self.error_tracker.get_errors()
     
-    def _build_full_name(self, row) -> str:
-        """Build full name from first and last name"""
-        first = str(row.get('first_name', '')).strip()
-        last = str(row.get('last_name', '')).strip()
-        return f"{first} {last}".strip()
+    def get_error_summary(self) -> Dict[str, int]:
+        """Get error summary"""
+        return self.error_tracker.get_error_summary()
     
-    def get_existing_emails_batch(self, emails: List[str]) -> List[str]:
-        """Get list of emails that already exist in database (for deduplication)"""
-        try:
-            from sqlalchemy import create_engine, text
-            from config.database import engine
-            
-            # Query database for existing emails
-            with engine.connect() as conn:
-                query = text(f"SELECT email FROM contacts WHERE email IN :emails")
-                result = conn.execute(query, {'emails': tuple(emails)})
-                existing = [row[0] for row in result]
-                return existing
-        except Exception as e:
-            print(f"Error checking existing emails: {str(e)}")
-            return []
+    def get_error_tracker(self) -> ImportErrorTracker:
+        """Get the error tracker instance"""
+        return self.error_tracker
     
-    def check_duplicates_in_batch(self, df: DataFrame) -> DataFrame:
-        """Check which emails already exist in database"""
-        try:
-            # Get unique emails from DataFrame
-            emails = df.select("email").distinct().collect()
-            email_list = [row.email for row in emails]
-            
-            # Check which exist in database
-            existing_emails = self.get_existing_emails_batch(email_list)
-            existing_set = set(existing_emails)
-            
-            # Mark duplicates
-            from pyspark.sql.functions import when, col, lit
-            df_with_flag = df.withColumn(
-                "is_duplicate",
-                when(col("email").isin(list(existing_set)), lit(True))
-                .otherwise(lit(False))
-            )
-            
-            return df_with_flag
-        except Exception as e:
-            print(f"Error checking duplicates: {str(e)}")
-            return df
+    def clear_errors(self):
+        """Clear error tracker"""
+        self.error_tracker.clear()
 

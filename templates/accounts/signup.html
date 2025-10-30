@@ -1,0 +1,315 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Contact Manager</title>
+    
+    <!-- Icon Libraries -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/@heroicons/react@2.0.18/dist/index.umd.js"></script>
+    
+    <!-- Custom CSS System -->
+    <link rel="stylesheet" href="{% static 'css/theme.css' %}">
+    <link rel="stylesheet" href="{% static 'css/grid-system.css' %}">
+    <link rel="stylesheet" href="{% static 'css/components.css' %}">
+    <link rel="stylesheet" href="{% static 'css/icons.css' %}">
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+    <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}">
+    <link rel="stylesheet" href="{% static 'css/tooltips.css' %}">
+</head>
+<body style="background-color: var(--bg); color: var(--text);">
+    <!-- Theme Toggle -->
+    <button id="theme-toggle" class="position-fixed btn btn-primary d-flex align-items-center gap-2" aria-label="Toggle theme">
+        <i class="ri-sun-line d-none" id="icon-sun"></i>
+        <i class="ri-moon-line" id="icon-moon"></i>
+        <span class="d-none d-sm-inline">Theme</span>
+    </button>
+    
+    <div class="auth-container">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-10 col-xl-9">
+                    <div class="auth-split-container">
+                        <div class="row g-0">
+                            <!-- Hero Section -->
+                            <div class="col-md-5 d-none d-md-flex">
+                                <div class="auth-hero-section">
+                                    <div class="auth-hero-content">
+                                        <div class="auth-icon">
+                                            <i class="fas fa-user-plus"></i>
+                                        </div>
+                                        <h2 class="mb-3">Create Your Account</h2>
+                                        <p class="lead">
+                                            Join thousands of professionals who trust Contact Manager
+                                        </p>
+                                        <div class="mt-4">
+                                            <div class="d-flex align-items-center gap-3 text-start mb-3">
+                                                <i class="fas fa-check-circle fa-lg"></i>
+                                                <span>Free Forever</span>
+                                            </div>
+                                            <div class="d-flex align-items-center gap-3 text-start mb-3">
+                                                <i class="fas fa-check-circle fa-lg"></i>
+                                                <span>No Credit Card</span>
+                                            </div>
+                                            <div class="d-flex align-items-center gap-3 text-start">
+                                                <i class="fas fa-check-circle fa-lg"></i>
+                                                <span>Start in Seconds</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Form Section -->
+                            <div class="col-md-7">
+                                <div class="auth-form-section">
+                                    <div class="auth-form-header">
+                                        <h2>📝 Sign Up</h2>
+                                        <p>Create your account to get started</p>
+                                    </div>
+                                    
+                                    {% if messages %}
+                                        {% for message in messages %}
+                                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                                {{ message }}
+                                                <button type="button" class="btn-close" onclick="this.parentElement.remove()" aria-label="Close"></button>
+                                            </div>
+                                        {% endfor %}
+                                    {% endif %}
+                                    
+                                    <form method="post" id="signupForm">
+                                        {% csrf_token %}
+                                        
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-floating mb-3">
+                                                    <input type="text" 
+                                                           name="first_name" 
+                                                           id="first_name" 
+                                                           class="form-control" 
+                                                           placeholder="First Name" 
+                                                           required>
+                                                    <label for="first_name">
+                                                        <i class="fas fa-user"></i> First Name
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-floating mb-3">
+                                                    <input type="text" 
+                                                           name="last_name" 
+                                                           id="last_name" 
+                                                           class="form-control" 
+                                                           placeholder="Last Name">
+                                                    <label for="last_name">
+                                                        <i class="fas fa-user"></i> Last Name
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="form-floating mb-3">
+                                            <input type="email" 
+                                                   name="email" 
+                                                   id="email" 
+                                                   class="form-control" 
+                                                   placeholder="name@example.com" 
+                                                   required>
+                                            <label for="email">
+                                                <i class="fas fa-envelope"></i> Email Address
+                                            </label>
+                                        </div>
+                                        
+                                        <div class="form-floating mb-3">
+                                            <input type="password" 
+                                                   name="password" 
+                                                   id="password" 
+                                                   class="form-control" 
+                                                   placeholder="Password" 
+                                                   required 
+                                                   minlength="8">
+                                            <label for="password">
+                                                <i class="fas fa-lock"></i> Password
+                                            </label>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <div id="password-strength" class="password-strength">
+                                                <div class="password-strength-bar" id="strengthBar"></div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="form-floating mb-3">
+                                            <input type="password" 
+                                                   name="confirm_password" 
+                                                   id="confirm_password" 
+                                                   class="form-control" 
+                                                   placeholder="Confirm Password" 
+                                                   required>
+                                            <label for="confirm_password">
+                                                <i class="fas fa-lock"></i> Confirm Password
+                                            </label>
+                                            <div id="password-match" class="mt-2"></div>
+                                        </div>
+                                        
+                                        <div class="terms-check mb-3">
+                                            <input type="checkbox" id="agree-terms" required>
+                                            <label for="agree-terms">
+                                                I agree to the 
+                                                <a href="#" target="_blank">Terms of Service</a> 
+                                                and 
+                                                <a href="#" target="_blank">Privacy Policy</a>
+                                            </label>
+                                        </div>
+                                        
+                                        <button type="submit" class="btn btn-auth-primary mb-3">
+                                            <i class="fas fa-user-plus"></i> Create Account
+                                        </button>
+                                        
+                                        <div class="divider">
+                                            <span>or sign up with</span>
+                                        </div>
+                                        
+                                        <div class="social-buttons">
+                                            <button type="button" class="social-btn" disabled>
+                                                <i class="fab fa-google"></i> Google
+                                            </button>
+                                            <button type="button" class="social-btn" disabled>
+                                                <i class="fab fa-github"></i> GitHub
+                                            </button>
+                                        </div>
+                                    </form>
+                                    
+                                    <div class="auth-links">
+                                        <p>
+                                            Already have an account? 
+                                            <a href="{% url 'accounts:login' %}">Sign in here</a>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Initialize Lucide Icons -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        });
+    </script>
+    
+    <!-- Theme Toggle JS -->
+    <script src="{% static 'js/theme-toggle.js' %}"></script>
+    
+    <script>
+        // Password strength indicator
+        document.getElementById('password').addEventListener('input', function() {
+            const password = this.value;
+            const strengthBar = document.getElementById('strengthBar');
+            
+            let strength = 0;
+            let strengthClass = '';
+            let color = '';
+            
+            if (password.length >= 8) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[a-z]/.test(password)) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) strength++;
+            
+            switch(strength) {
+                case 0:
+                    strengthClass = 'password-strength-weak';
+                    color = '#dc3545';
+                    break;
+                case 1:
+                case 2:
+                    strengthClass = 'password-strength-fair';
+                    color = '#ffc107';
+                    break;
+                case 3:
+                case 4:
+                    strengthClass = 'password-strength-good';
+                    color = '#28a745';
+                    break;
+                case 5:
+                    strengthClass = 'password-strength-strong';
+                    color = '#20c997';
+                    break;
+            }
+            
+            strengthBar.style.width = `${(strength / 5) * 100}%`;
+            strengthBar.className = `password-strength-bar ${strengthClass}`;
+            strengthBar.style.backgroundColor = color;
+        });
+        
+        // Password match validation
+        document.getElementById('confirm_password').addEventListener('input', function() {
+            const password = document.getElementById('password').value;
+            const confirm = this.value;
+            const matchDiv = document.getElementById('password-match');
+            
+            if (confirm) {
+                if (password === confirm) {
+                    matchDiv.innerHTML = '<small class="text-success"><i class="fas fa-check-circle"></i> Passwords match</small>';
+                    this.classList.add('is-valid');
+                    this.classList.remove('is-invalid');
+                } else {
+                    matchDiv.innerHTML = '<small class="text-danger"><i class="fas fa-times-circle"></i> Passwords do not match</small>';
+                    this.classList.add('is-invalid');
+                    this.classList.remove('is-valid');
+                }
+            } else {
+                matchDiv.innerHTML = '';
+                this.classList.remove('is-valid', 'is-invalid');
+            }
+        });
+        
+        // Form animations and validation
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputs = document.querySelectorAll('.form-control');
+            
+            inputs.forEach(input => {
+                input.addEventListener('focus', function() {
+                    this.parentElement.classList.add('focused');
+                });
+                
+                input.addEventListener('blur', function() {
+                    if (!this.value) {
+                        this.parentElement.classList.remove('focused');
+                    }
+                });
+            });
+            
+            // Form submission
+            const form = document.getElementById('signupForm');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    const password = document.getElementById('password').value;
+                    const confirm = document.getElementById('confirm_password').value;
+                    
+                    if (password !== confirm) {
+                        e.preventDefault();
+                        alert('Passwords do not match!');
+                        return;
+                    }
+                    
+                    const btn = form.querySelector('button[type="submit"]');
+                    btn.classList.add('loading');
+                });
+            }
+        });
+    </script>
+</body>
+</html>

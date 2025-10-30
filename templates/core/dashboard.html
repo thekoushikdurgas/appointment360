@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Contact Manager{% endblock %}
+
+{% block content %}
+<!-- Welcome Banner for First-Time Users -->
+<div class="container-fluid mb-3" id="welcome-banner" style="display: none;">
+    <div class="alert alert-info alert-dismissible fade show" role="alert" style="border-left: 4px solid #FF6B35; border-radius: 8px;">
+        <h5><i class="fas fa-lightbulb"></i> Welcome to Contact Manager, {% if user.first_name %}{{ user.first_name }}{% else %}{{ user.email }}{% endif %}!</h5>
+        <p class="mb-2">We've prepared an interactive tour to help you get started. <a href="#" onclick="OnboardingTour.resetOnboarding(); OnboardingTour.init(); return false;" class="alert-link">Start the tour</a> or explore on your own.</p>
+        <button type="button" class="btn-close" onclick="this.parentElement.remove()" aria-label="Close"></button>
+    </div>
+</div>
+
+<!-- Hero Section -->
+<div class="hero-section" data-tour="welcome" style="background: var(--card);">
+    <div class="container-fluid py-4">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="mb-2" style="color: var(--text);">
+                    <i class="fas fa-home"></i> Dashboard
+                </h1>
+                <p class="mb-0" style="color: var(--muted);">
+                    Welcome back{% if user.first_name %}, {{ user.first_name }}{% endif %}! Manage your contacts efficiently.
+                </p>
+            </div>
+            <div class="col-md-4 text-end">
+                <button onclick="OnboardingTour.resetOnboarding(); OnboardingTour.init();" class="btn btn-light btn-lg me-2 d-inline-flex align-items-center gap-2" title="Start Tour">
+                    <i class="ri-question-line"></i>
+                    <span class="d-none d-sm-inline">Start Tour</span>
+                </button>
+                <a href="{% url 'contacts:list' %}" class="btn btn-light btn-lg d-inline-flex align-items-center gap-2">
+                    <i class="ri-team-line"></i>
+                    <span>View Contacts</span>
+                </a>
+            </div>
+        </div>
+    </div>
+    
+</div>
+
+<div class="container-fluid mt-4">
+    <!-- Key Metrics -->
+    <h3 class="mb-4" data-tour="metrics" style="color: var(--text);">📊 Key Metrics</h3>
+    <div class="row mb-4">
+        {% for metric in metrics %}
+        <div class="col-md-3" data-tour="metrics">
+            <div class="metric-card rounded-3 shadow-sm" style="background: linear-gradient(135deg, {{ metric.color_from }} 0%, {{ metric.color_to }} 100%);">
+                <div class="text-center">
+                    <div style="font-size: 2.5rem; color: white;">{{ metric.icon|safe }}</div>
+                    <h2 class="text-white mt-2 mb-0" data-animate-counter data-target="{{ metric.value }}">0</h2>
+                    <p class="text-white-50 mb-0" style="opacity: 0.9;">{{ metric.label }}</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <hr class="my-4">
+
+    <!-- Charts -->
+    <div class="row mb-4" data-tour="charts">
+        <div class="col-md-6" data-tour="charts">
+            <div class="card border-0 shadow-sm" style="background-color: var(--card); color: var(--text);">
+                <div class="card-header">
+                    <h5 class="mb-0">📊 Industry Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <div id="industry-chart">{{ industry_chart|safe }}</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6" data-tour="charts">
+            <div class="card border-0 shadow-sm" style="background-color: var(--card); color: var(--text);">
+                <div class="card-header">
+                    <h5 class="mb-0">🌍 Country Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <div id="country-chart">{{ country_chart|safe }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row" data-tour="quick-actions">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm" data-tour="quick-actions" style="background-color: var(--card); color: var(--text);">
+                <div class="card-header">
+                    <h5 class="mb-0">🚀 Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <a href="{% url 'contacts:list' %}" class="btn btn-primary btn-lg w-100 mb-2 d-inline-flex align-items-center gap-2">
+                                <i class="ri-team-line"></i> View All Contacts
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="{% url 'imports:upload' %}" class="btn btn-success btn-lg w-100 mb-2 d-inline-flex align-items-center gap-2">
+                                <i class="ri-upload-cloud-2-line"></i> Import Contacts
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="{% url 'analytics:dashboard' %}" class="btn btn-info btn-lg w-100 mb-2 d-inline-flex align-items-center gap-2">
+                                <i class="ri-bar-chart-line"></i> View Analytics
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="container-fluid mt-4">
+    <div class="card border-0 shadow-sm" style="background-color: var(--card); color: var(--text);">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="ri-time-line"></i> Recent Activity</h5>
+        </div>
+        <div class="card-body">
+            <p class="text-muted">No recent activity to display.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<!-- Plotly.js -->
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Onboarding Tour Script -->
+<script src="{% static 'js/onboarding.js' %}"></script>
+
+<script>
+// Initialize charts if Plotly data is available
+{% comment %} {% if industry_chart %}
+    document.getElementById('industry-chart').innerHTML = {{ industry_chart|safe }};
+{% endif %}
+
+{% if country_chart %}
+    document.getElementById('country-chart').innerHTML = {{ country_chart|safe }};
+{% endif %} {% endcomment %}
+
+// Animate counter on metric cards
+document.addEventListener('DOMContentLoaded', function() {
+    const counters = document.querySelectorAll('[data-animate-counter]');
+    
+    counters.forEach(counter => {
+        const target = parseInt(counter.getAttribute('data-target'));
+        if (isNaN(target)) return;
+        
+        const duration = 2000; // 2 seconds
+        const increment = target / (duration / 16); // 60fps
+        let current = 0;
+        
+        const updateCounter = () => {
+            current += increment;
+            if (current < target) {
+                counter.textContent = Math.floor(current);
+                requestAnimationFrame(updateCounter);
+            } else {
+                counter.textContent = target;
+            }
+        };
+        
+        // Start animation when element is visible
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    updateCounter();
+                    observer.unobserve(entry.target);
+                }
+            });
+        });
+        
+        observer.observe(counter);
+    });
+    
+    // Show welcome banner for authenticated users
+    {% if user.is_authenticated %}
+        const banner = document.getElementById('welcome-banner');
+        if (banner && !OnboardingTour.hasCompletedOnboarding()) {
+            banner.style.display = 'block';
+        }
+    {% endif %}
+});
+</script>
+{% endblock %}
+

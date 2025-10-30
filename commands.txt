@@ -1,4 +1,15 @@
 
+# UI build (Tailwind + DaisyUI)
+# 1) Install Node 18+ and run once:
+#    npm i
+# 2) Development (watch):
+#    npx tailwindcss -i ./static/css/tailwind.css -o ./static/build/tailwind.css --watch
+#    or
+#    npm run dev:css
+# 3) Production build:
+#    npm run build:css
+# 4) Django will serve built file at: static/build/tailwind.css (included in templates/base.html)
+
 pip install -r requirements.txt
 pip install -r requirements-dev.txt
 playwright install chromium
@@ -11,6 +22,24 @@ streamlit run app.py
 pip install -r requirements.txt
 python -m streamlit run main.py
 
+
+
+django_env\Scripts\activate
+cd django_contact_manager
+pip install -r requirements.txt
+
+
+python manage.py showmigrations
+
+
+python manage.py createsuperuser
+
+
+python manage.py makemigrations
+python manage.py migrate
+python manage.py runserver
+
+celery -A config worker -l info
 
 cd D:\durgas\appointment360-main\django
 venv\Scripts\activate
@@ -113,3 +142,51 @@ git config --global user.name "thekoushikdurgas"
 
 
 At first, @ko.html  properly see the login popup as a class top-level-modal-container and then properly handles the popup to remove it and then In my scraping technique, when you take HTML from a URL, the url website has infinite scrolling, so you scroll to the last and then take the HTML and then you can take jobs And also in HTML, there is a button named "See more jobs", if you find that button, click it so we get more jobs loaded, but again, this button comes after clicking that button, so before scraping jobs, check in HTML if there is any "See more jobs" button, if you find click it and we get more jobs but, not find any button so then scrape it, Learn, understand, and analyse this deeply, and then break your tasks into smaller tasks.
+
+
+update my Database Tables contacts
+Name	Description	Data Type	Format	Nullable	
+id integer	int4		
+full_name character varying	varchar		
+first_name character varying	varchar		
+last_name character varying	varchar		
+title character varying	varchar		
+email character varying	varchar		
+phone character varying	varchar		
+company character varying	varchar		
+industry character varying	varchar		
+company_size character varying	varchar		
+company_address text	text		
+website character varying	varchar		
+employees_count integer	int4		
+annual_revenue integer	int4		
+total_funding integer	int4		
+latest_funding_amount integer	int4		
+seniority character varying	varchar		
+departments text	text		
+keywords text	text		
+technologies text	text		
+email_status character varying	varchar		
+stage character varying	varchar		
+city character varying	varchar		
+state character varying	varchar		
+country character varying	varchar		
+postal_code character varying	varchar		
+company_city character varying	varchar		
+company_state character varying	varchar		
+company_country character varying	varchar		
+company_phone character varying	varchar		
+linkedin character varying	varchar		
+person_linkedin_url character varying	varchar		
+company_linkedin_url character varying	varchar		
+facebook_url character varying	varchar		
+facebook character varying	varchar		
+twitter_url character varying	varchar		
+twitter character varying	varchar		
+notes text	text		
+tags character varying	varchar		
+status character varying	varchar		
+is_active boolean	bool		
+created_at timestamp without time zone	timestamp		
+updated_at timestamp without time zone	timestamp		
+user_id character varying	varchar		

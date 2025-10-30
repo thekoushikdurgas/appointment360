@@ -1,11 +1,14 @@
 """
 CSV Column Mapper - Map CSV columns to database fields
+Migrated from Stremlit/services/csv_column_mapper.py
 """
 from typing import Dict, List
 import pandas as pd
 
 
 class CSVColumnMapper:
+    """Map CSV columns to Django model fields"""
+    
     def __init__(self):
         self.field_mappings = {
             # Personal Information
@@ -126,3 +129,4 @@ class CSVColumnMapper:
         df_mapped = df_mapped[mapped_columns]
         
         return df_mapped
+

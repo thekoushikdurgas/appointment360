@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Import Preview - Contact Manager{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="text-white mb-2">
+                    <i class="ri-eye-line"></i> Import Preview
+                </h1>
+                <p class="text-white-50 mb-0">{{ filename }}</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="{% url 'imports:upload' %}" class="btn btn-light btn-lg">
+                    <i class="ri-arrow-left-line"></i> Upload New File
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid mt-4">
+    <!-- File Information -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card" style="border: 2px solid var(--primary);">
+                <div class="card-body text-center">
+                    <i class="fas fa-file fa-3x mb-2" style="color: var(--primary);"></i>
+                    <h6 class="text-muted">File Size</h6>
+                    <h4>{{ file_size_mb|floatformat:2 }} MB</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card" style="border: 2px solid var(--success);">
+                <div class="card-body text-center">
+                    <i class="fas fa-list fa-3x mb-2" style="color: var(--success);"></i>
+                    <h6 class="text-muted">Total Rows</h6>
+                    <h4>{{ total_rows|floatformat:0|intcomma }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card" style="border: 2px solid var(--info);">
+                <div class="card-body text-center">
+                    <i class="fas fa-check-circle fa-3x text-info mb-2"></i>
+                    <h6 class="text-muted">Mapped Columns</h6>
+                    <h4>{{ mapping_count }}</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Column Mapping Card -->
+    <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="ri-database-2-line"></i> Column Mapping
+                    </h5>
+                </div>
+        <div class="card-body">
+            {% if auto_mapping %}
+            <div class="alert alert-success" style="border-left: 4px solid #28a745;">
+                <i class="fas fa-check-circle"></i> Auto-detected {{ auto_mapping|length }} column mappings
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>CSV Column</th>
+                            <th></th>
+                            <th>Database Field</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for csv_col, db_field in auto_mapping.items %}
+                        <tr>
+                            <td><code class="text-primary">{{ csv_col }}</code></td>
+                            <td class="text-center"><i class="fas fa-arrow-right text-success fa-lg"></i></td>
+                            <td><code class="text-success">{{ db_field }}</code></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-warning" style="border-left: 4px solid #ffc107;">
+                <i class="fas fa-exclamation-triangle"></i> Could not auto-detect column mappings
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- CSV Preview Card -->
+    <div class="card mb-4">
+        <div class="card-header" style="background: linear-gradient(135deg, #FF6B35 0%, #FF8C42 100%);">
+            <h5 class="mb-0 text-white">
+                <i class="fas fa-table"></i> CSV Preview (First 10 Rows)
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                {{ preview|safe }}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Import Action Card -->
+    <div class="card">
+        <div class="card-body text-center">
+            {% if auto_mapping %}
+            <form method="post" action="{% url 'imports:start' %}">
+                {% csrf_token %}
+                <input type="hidden" name="file_path" value="{{ file_path }}">
+                <input type="hidden" name="mapping" value='{{ mapping_json|default:"{}"|safe }}'>
+                
+                <div class="mb-4">
+                    <i class="fas fa-rocket fa-4x text-primary mb-3"></i>
+                    <h3>Ready to Import</h3>
+                    <p class="text-muted">Click the button below to start importing contacts</p>
+                    {% if file_size_mb and file_size_mb > 10 %}
+                    <div class="alert alert-info mt-2">
+                        <i class="fas fa-bolt"></i> Large file detected ({{ file_size_mb|floatformat:2 }} MB). Import will run in the background.
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <button type="submit" class="btn btn-auth-primary btn-lg">
+                    <i class="fas fa-upload"></i> Start Import Process
+                </button>
+            </form>
+            {% else %}
+            <div class="mb-4">
+                <i class="fas fa-ban fa-4x text-danger mb-3"></i>
+                <h3>Cannot Import</h3>
+                <p class="text-muted">No valid column mappings detected. Please upload a different file.</p>
+            </div>
+            <a href="{% url 'imports:upload' %}" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left"></i> Try Another File
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

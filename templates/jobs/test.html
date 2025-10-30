@@ -1,0 +1,274 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Test Job Scraper - Contact Manager{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="text-white mb-2">
+                    <i class="fas fa-vial"></i> Test Job Scraper
+                </h1>
+                <p class="text-white-50 mb-0">Test scraping functionality with sample URLs to verify popup handling, infinite scrolling, and job extraction</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="{% url 'jobs:scraper' %}" class="btn btn-light btn-lg">
+                    <i class="fas fa-arrow-left"></i> Back to Scraper
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-lg border-0 rounded-lg mb-4">
+                <div class="card-header bg-gradient-info text-white py-3">
+                    <h4 class="mb-0">
+                        <i class="fas fa-play me-2"></i> Run Test
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form id="test-form">
+                        <div class="mb-4">
+                            <label for="test_url" class="form-label fs-5">
+                                <i class="fas fa-link"></i> Test URL
+                            </label>
+                            <input type="url" class="form-control form-control-lg" id="test_url" 
+                                   value="https://example.com" placeholder="https://example.com">
+                            <div class="form-text">
+                                Enter a URL to test the scraping functionality.
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex">
+                            <button type="submit" class="btn btn-primary btn-lg" id="run-test-btn">
+                                <i class="fas fa-play"></i> Run Test
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-lg" id="test-sample-btn">
+                                <i class="fas fa-magic"></i> Test Sample
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Test Results -->
+            <div class="card shadow-lg border-0 rounded-lg" id="test-results" style="display: none;">
+                <div class="card-header bg-gradient-success text-white py-3">
+                    <h4 class="mb-0">
+                        <i class="fas fa-chart-line me-2"></i> Test Results
+                    </h4>
+                </div>
+                <div class="card-body" id="test-results-content">
+                    <!-- Results will be loaded here -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card shadow-lg border-0 rounded-lg mb-3">
+                <div class="card-header bg-gradient-primary text-white py-3">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list-check me-2"></i> Test Checklist
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="test-popup">
+                        <label class="form-check-label" for="test-popup">
+                            <i class="fas fa-window-close me-2"></i> Popup Detection
+                        </label>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="test-scroll">
+                        <label class="form-check-label" for="test-scroll">
+                            <i class="fas fa-scroll me-2"></i> Infinite Scroll
+                        </label>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="test-button">
+                        <label class="form-check-label" for="test-button">
+                            <i class="fas fa-hand-pointer me-2"></i> Button Detection
+                        </label>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="test-extraction">
+                        <label class="form-check-label" for="test-extraction">
+                            <i class="fas fa-download me-2"></i> Job Extraction
+                        </label>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="test-error">
+                        <label class="form-check-label" for="test-error">
+                            <i class="fas fa-exclamation-triangle me-2"></i> Error Handling
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card shadow-lg border-0 rounded-lg">
+                <div class="card-header bg-gradient-secondary text-white py-3">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i> Test Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        This test will verify that all scraping components are working correctly:
+                    </p>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Browser launches</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Page loads</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Popup handling</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Scroll detection</li>
+                        <li class="mb-0"><i class="fas fa-check text-success me-2"></i>Job extraction</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('test-form');
+    const runTestBtn = document.getElementById('run-test-btn');
+    const testSampleBtn = document.getElementById('test-sample-btn');
+    const testResults = document.getElementById('test-results');
+    const testResultsContent = document.getElementById('test-results-content');
+    
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        runTest();
+    });
+    
+    testSampleBtn.addEventListener('click', function() {
+        document.getElementById('test_url').value = 'https://example.com';
+        runTest();
+    });
+    
+    function runTest() {
+        const url = document.getElementById('test_url').value;
+        
+        if (!url) {
+            alert('Please enter a test URL');
+            return;
+        }
+        
+        // Show loading state
+        runTestBtn.disabled = true;
+        runTestBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Testing...';
+        
+        // Show results card
+        testResults.style.display = 'block';
+        testResultsContent.innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin fa-3x text-primary"></i><p class="mt-3">Running test...</p></div>';
+        
+        // Make API call
+        fetch('/jobs/test/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: `test_url=${encodeURIComponent(url)}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            displayResults(data);
+        })
+        .catch(error => {
+            displayResults({
+                success: false,
+                error: 'Network error: ' + error.message
+            });
+        })
+        .finally(() => {
+            // Reset button
+            runTestBtn.disabled = false;
+            runTestBtn.innerHTML = '<i class="fas fa-play me-2"></i>Run Test';
+        });
+    }
+    
+    function displayResults(data) {
+        if (data.success) {
+            testResultsContent.innerHTML = `
+                <div class="alert alert-success border-left-success rounded-lg">
+                    <h6><i class="fas fa-check-circle me-2"></i>Test Passed!</h6>
+                    <p class="mb-0">${data.message}</p>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-6 mb-3">
+                        <div class="p-3 bg-light rounded">
+                            <h6 class="text-muted">Jobs Found</h6>
+                            <h2 class="text-primary mb-0">${data.total_count}</h2>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="p-3 bg-light rounded">
+                            <h6 class="text-muted">Test URL</h6>
+                            <p class="mb-0"><a href="${data.test_url || document.getElementById('test_url').value}" target="_blank">View</a></p>
+                        </div>
+                    </div>
+                </div>
+                ${data.jobs && data.jobs.length > 0 ? `
+                <div class="mt-4">
+                    <h6><i class="fas fa-list me-2"></i>Sample Jobs</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Company</th>
+                                    <th>Location</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.jobs.map(job => `
+                                    <tr>
+                                        <td>${job.title || 'N/A'}</td>
+                                        <td>${job.company || 'N/A'}</td>
+                                        <td>${job.location || 'N/A'}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                ` : ''}
+            `;
+            
+            // Check off test items
+            document.getElementById('test-popup').checked = true;
+            document.getElementById('test-scroll').checked = true;
+            document.getElementById('test-button').checked = true;
+            document.getElementById('test-extraction').checked = true;
+            document.getElementById('test-error').checked = true;
+        } else {
+            testResultsContent.innerHTML = `
+                <div class="alert alert-danger border-left-danger rounded-lg">
+                    <h6><i class="fas fa-exclamation-triangle me-2"></i>Test Failed</h6>
+                    <p class="mb-0">${data.error}</p>
+                </div>
+                <div class="mt-3">
+                    <h6><i class="fas fa-lightbulb me-2"></i>Troubleshooting</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Check if the URL is accessible</li>
+                        <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Verify the website structure</li>
+                        <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Check browser console for errors</li>
+                        <li class="mb-0"><i class="fas fa-check-circle text-success me-2"></i>Try a different test URL</li>
+                    </ul>
+                </div>
+            `;
+            
+            // Check off error handling
+            document.getElementById('test-error').checked = true;
+        }
+    }
+});
+</script>
+{% endblock %}

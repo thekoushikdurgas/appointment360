@@ -1,0 +1,413 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loading - Contact Manager</title>
+    <!-- Fallback redirect if JS/animations fail -->
+    <meta http-equiv="refresh" content="6;url={% url 'core:welcome' %}">
+    
+    <!-- Custom CSS System -->
+    <link rel="stylesheet" href="{% static 'css/theme.css' %}">
+    <link rel="stylesheet" href="{% static 'css/grid-system.css' %}">
+    <link rel="stylesheet" href="{% static 'css/components.css' %}">
+    <link rel="stylesheet" href="{% static 'css/icons.css' %}">
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+    
+    <!-- Loading styles -->
+    <link rel="stylesheet" href="{% static 'css/loading.css' %}">
+    
+    <!-- Animations for fade-out effect -->
+    <link rel="stylesheet" href="{% static 'css/animations.css' %}">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/@heroicons/react@2.0.18/dist/index.umd.js"></script>
+    
+    <style>
+        /* Prevent scroll during loading */
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            height: 100vh;
+        }
+        
+        /* Theme initialization */
+        html {
+            color-scheme: light dark;
+        }
+        
+        /* Initialize theme based on user preference or localStorage */
+        :root {
+            color-scheme: light dark;
+        }
+    </style>
+</head>
+<body class="loading-body">
+    <div class="loading-page" id="loadingPage">
+        <!-- Animated Background Gradient -->
+        <div class="loading-background"></div>
+        
+        <!-- Floating Icons Decorations -->
+        <div class="floating-icons">
+            <i class="ri-contacts-book-2-line floating-icon icon-1"></i>
+            <i class="ri-user-add-line floating-icon icon-2"></i>
+            <i class="ri-calendar-check-line floating-icon icon-3"></i>
+            <i class="ri-file-search-line floating-icon icon-4"></i>
+            <i class="ri-bar-chart-line floating-icon icon-5"></i>
+            <i class="ri-shield-check-line floating-icon icon-6"></i>
+            <i class="ri-database-line floating-icon icon-7"></i>
+            <i class="ri-cloud-upload-line floating-icon icon-8"></i>
+            <i class="ri-search-line floating-icon icon-9"></i>
+            <i class="ri-team-line floating-icon icon-10"></i>
+            <i class="ri-global-line floating-icon icon-11"></i>
+            <i class="ri-notification-line floating-icon icon-12"></i>
+            <i class="ri-mail-line floating-icon icon-13"></i>
+            <i class="ri-phone-line floating-icon icon-14"></i>
+            <i class="ri-lock-line floating-icon icon-15"></i>
+        </div>
+        
+        <!-- Animated Particles Background -->
+        <div class="particles-container">
+            <div class="particle particle-1"></div>
+            <div class="particle particle-2"></div>
+            <div class="particle particle-3"></div>
+            <div class="particle particle-4"></div>
+            <div class="particle particle-5"></div>
+            <div class="particle particle-6"></div>
+            <div class="particle particle-7"></div>
+            <div class="particle particle-8"></div>
+        </div>
+        
+        <!-- Main Loading Content -->
+        <div class="loading-content">
+            <!-- Logo and Brand Section -->
+            <div class="brand-section fade-in">
+                <!-- Animated Logo Container -->
+                <div class="logo-container">
+                    <div class="logo-spinner-wrapper">
+                        <div class="logo-spinner">
+                            <div class="spinner-ring ring-1"></div>
+                            <div class="spinner-ring ring-2"></div>
+                            <div class="spinner-ring ring-3"></div>
+                            <div class="logo-icon-wrapper">
+                                <i class="ri-contacts-book-2-line logo-icon"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="logo-pulse"></div>
+                </div>
+                
+                <!-- Brand Name -->
+                <h1 class="brand-name slide-in-down">
+                    <span class="brand-text">
+                        <i class="ri-contacts-book-2-line brand-icon"></i>
+                        Contact Manager
+                    </span>
+                </h1>
+                
+                <!-- Tagline -->
+                <p class="brand-tagline slide-in-up">
+                    <i class="ri-rocket-line tagline-icon"></i>
+                    Your Professional Contact Management Hub
+                </p>
+            </div>
+            
+            <!-- Progress Section -->
+            <div class="progress-section">
+                <!-- Progress Steps with Icons -->
+                <div class="progress-steps">
+                    <div class="progress-step" id="step1">
+                        <div class="step-icon-wrapper">
+                            <i class="ri-settings-3-line step-icon"></i>
+                        </div>
+                        <div class="step-content">
+                            <span class="step-label">Initializing application</span>
+                            <div class="step-progress-line"></div>
+                        </div>
+                        <i class="ri-check-line step-check" style="display: none;"></i>
+                    </div>
+                    
+                    <div class="progress-step" id="step2">
+                        <div class="step-icon-wrapper">
+                            <i class="ri-file-download-line step-icon"></i>
+                        </div>
+                        <div class="step-content">
+                            <span class="step-label">Loading assets</span>
+                            <div class="step-progress-line"></div>
+                        </div>
+                        <i class="ri-check-line step-check" style="display: none;"></i>
+                    </div>
+                    
+                    <div class="progress-step" id="step3">
+                        <div class="step-icon-wrapper">
+                            <i class="ri-layout-grid-line step-icon"></i>
+                        </div>
+                        <div class="step-content">
+                            <span class="step-label">Preparing workspace</span>
+                            <div class="step-progress-line"></div>
+                        </div>
+                        <i class="ri-check-line step-check" style="display: none;"></i>
+                    </div>
+                    
+                    <div class="progress-step" id="step4">
+                        <div class="step-icon-wrapper">
+                            <i class="ri-checkbox-circle-line step-icon"></i>
+                        </div>
+                        <div class="step-content">
+                            <span class="step-label">Almost ready</span>
+                            <div class="step-progress-line"></div>
+                        </div>
+                        <i class="ri-check-line step-check" style="display: none;"></i>
+                    </div>
+                </div>
+                
+                <!-- Main Progress Bar -->
+                <div class="progress-bar-container">
+                    <div class="progress-bar-wrapper">
+                        <div class="progress-bar-fill" id="progressBar"></div>
+                        <div class="progress-bar-shine"></div>
+                    </div>
+                    <div class="progress-percentage">
+                        <span id="progressPercent">0</span>%
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Feature Preview Cards (Skeleton) -->
+            <div class="feature-preview">
+                <div class="skeleton-card card-1">
+                    <div class="skeleton-icon"><i class="ri-contacts-line"></i></div>
+                    <div class="skeleton-content">
+                        <div class="skeleton-title"></div>
+                        <div class="skeleton-text"></div>
+                    </div>
+                </div>
+                <div class="skeleton-card card-2">
+                    <div class="skeleton-icon"><i class="ri-bar-chart-box-line"></i></div>
+                    <div class="skeleton-content">
+                        <div class="skeleton-title"></div>
+                        <div class="skeleton-text"></div>
+                    </div>
+                </div>
+                <div class="skeleton-card card-3">
+                    <div class="skeleton-icon"><i class="ri-file-upload-line"></i></div>
+                    <div class="skeleton-content">
+                        <div class="skeleton-title"></div>
+                        <div class="skeleton-text"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Loading Status Text -->
+            <div class="loading-status">
+                <p class="loading-text">
+                    <span class="loading-dots">
+                        <span>.</span><span>.</span><span>.</span>
+                    </span>
+                </p>
+            </div>
+        </div>
+        
+        <!-- Theme Toggle Button -->
+        <button class="theme-toggle-loading" id="themeToggle" aria-label="Toggle theme" tabindex="0">
+            <i class="ri-sun-line theme-icon-sun"></i>
+            <i class="ri-moon-line theme-icon-moon"></i>
+            <span class="theme-ripple"></span>
+        </button>
+    </div>
+
+    <noscript>
+        <div class="noscript-message">
+            <div class="noscript-content">
+                <i class="ri-error-warning-line noscript-icon"></i>
+                <h2>JavaScript Required</h2>
+                <p>JavaScript is disabled. Please enable it to continue.</p>
+                <a href="{% url 'core:welcome' %}" class="noscript-button">
+                    <i class="ri-arrow-right-line"></i>
+                    Continue Anyway
+                </a>
+            </div>
+        </div>
+    </noscript>
+
+    <script>
+        // Theme Management
+        (function() {
+            const html = document.documentElement;
+            const themeToggle = document.getElementById('themeToggle');
+            const themeIconSun = document.querySelector('.theme-icon-sun');
+            const themeIconMoon = document.querySelector('.theme-icon-moon');
+            
+            // Get theme from localStorage or system preference
+            function getInitialTheme() {
+                const stored = localStorage.getItem('theme');
+                if (stored) return stored;
+                return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            
+            // Apply theme
+            function applyTheme(theme) {
+                html.className = theme === 'dark' ? 'theme-dark' : 'theme-light';
+                localStorage.setItem('theme', theme);
+                updateThemeIcons(theme);
+            }
+            
+            // Update theme icons
+            function updateThemeIcons(theme) {
+                if (theme === 'dark') {
+                    themeIconSun?.classList.remove('hidden');
+                    themeIconMoon?.classList.add('hidden');
+                } else {
+                    themeIconSun?.classList.add('hidden');
+                    themeIconMoon?.classList.remove('hidden');
+                }
+            }
+            
+            // Initialize theme
+            applyTheme(getInitialTheme());
+            
+            // Toggle theme
+            function handleThemeToggle() {
+                const currentTheme = html.classList.contains('theme-dark') ? 'dark' : 'light';
+                applyTheme(currentTheme === 'dark' ? 'light' : 'dark');
+                
+                // Add ripple effect
+                const ripple = themeToggle?.querySelector('.theme-ripple');
+                if (ripple) {
+                    ripple.classList.add('active');
+                    setTimeout(() => ripple.classList.remove('active'), 600);
+                }
+            }
+            
+            themeToggle?.addEventListener('click', handleThemeToggle);
+            themeToggle?.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleThemeToggle();
+                }
+            });
+            
+            // Watch for system theme changes
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+                if (!localStorage.getItem('theme')) {
+                    applyTheme(e.matches ? 'dark' : 'light');
+                }
+            });
+        })();
+        
+        // Loading Progress Management
+        let currentStep = 0;
+        const totalSteps = 4;
+        let progressPercent = 0;
+        const targetProgress = [25, 50, 75, 100];
+        
+        function activateStep(stepNum) {
+            const step = document.getElementById(`step${stepNum}`);
+            if (step) {
+                step.classList.add('active');
+                const iconWrapper = step.querySelector('.step-icon-wrapper');
+                const checkIcon = step.querySelector('.step-check');
+                const progressLine = step.querySelector('.step-progress-line');
+                
+                if (iconWrapper) {
+                    iconWrapper.classList.add('spinning');
+                }
+                if (progressLine) {
+                    progressLine.style.width = '100%';
+                }
+            }
+        }
+        
+        function completeStep(stepNum) {
+            const step = document.getElementById(`step${stepNum}`);
+            if (step) {
+                step.classList.add('completed');
+                step.classList.remove('active');
+                const iconWrapper = step.querySelector('.step-icon-wrapper');
+                const checkIcon = step.querySelector('.step-check');
+                const progressLine = step.querySelector('.step-progress-line');
+                
+                if (iconWrapper) {
+                    iconWrapper.classList.remove('spinning');
+                    iconWrapper.style.display = 'none';
+                }
+                if (checkIcon) {
+                    checkIcon.style.display = 'inline-block';
+                }
+                if (progressLine) {
+                    progressLine.style.backgroundColor = 'var(--success)';
+                }
+            }
+        }
+        
+        function updateProgress(percent) {
+            progressPercent = percent;
+            const progressBar = document.getElementById('progressBar');
+            const progressPercentEl = document.getElementById('progressPercent');
+            
+            if (progressBar) {
+                progressBar.style.width = percent + '%';
+            }
+            if (progressPercentEl) {
+                progressPercentEl.textContent = Math.round(percent);
+            }
+        }
+        
+        // Progress through steps
+        const stepTimings = [800, 1800, 2800, 3800];
+        
+        stepTimings.forEach((timing, index) => {
+            setTimeout(() => {
+                currentStep = index + 1;
+                activateStep(currentStep);
+                updateProgress((currentStep / totalSteps) * 100);
+                
+                setTimeout(() => {
+                    completeStep(currentStep);
+                }, 400);
+            }, timing);
+        });
+        
+        // Final redirect
+        setTimeout(() => {
+            const loadingPage = document.getElementById('loadingPage');
+            if (loadingPage) {
+                loadingPage.classList.add('fade-out');
+                
+                setTimeout(() => {
+                    window.location.href = "{% url 'core:welcome' %}";
+                }, 500);
+            } else {
+                window.location.href = "{% url 'core:welcome' %}";
+            }
+        }, 4500);
+        
+        // Smooth progress animation
+        function animateProgress() {
+            const progressBar = document.getElementById('progressBar');
+            if (!progressBar) return;
+            
+            let current = 0;
+            const increment = 0.5;
+            const target = 100;
+            
+            const interval = setInterval(() => {
+                current += increment;
+                if (current <= target) {
+                    updateProgress(Math.min(current, progressPercent));
+                } else {
+                    clearInterval(interval);
+                }
+            }, 20);
+        }
+        
+        // Start smooth progress animation
+        setTimeout(animateProgress, 200);
+    </script>
+</body>
+</html>

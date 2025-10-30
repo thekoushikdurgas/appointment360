@@ -1,4 +1,2 @@
-"""
-Tests for Contact Management System
-"""
+# Tests package
 

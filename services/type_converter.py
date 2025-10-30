@@ -1,5 +1,6 @@
 """
 Type Converter - Convert CSV values to appropriate database types
+Migrated from Stremlit/services/type_converter.py
 """
 import pandas as pd
 from typing import Any, Optional
@@ -16,7 +17,8 @@ class TypeConverter:
         'annual_revenue',
         'total_funding',
         'latest_funding_amount',
-        'user_id'
+        'user_id',
+        'id'
     }
     
     # Fields that should be booleans
@@ -137,4 +139,16 @@ class TypeConverter:
             cleaned_data[field] = TypeConverter.convert_value(field, value)
         
         return cleaned_data
+    
+    @staticmethod
+    def clean_and_merge_names(contact_data: dict) -> dict:
+        """Combine first_name and last_name into full_name if not provided"""
+        if 'full_name' not in contact_data and ('first_name' in contact_data or 'last_name' in contact_data):
+            first_name = contact_data.get('first_name', '')
+            last_name = contact_data.get('last_name', '')
+            full_name = f"{first_name} {last_name}".strip()
+            if full_name:
+                contact_data['full_name'] = full_name
+        
+        return contact_data
 

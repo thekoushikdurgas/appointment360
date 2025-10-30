@@ -4,9 +4,6 @@ __pycache__/
 *$py.class
 *.so
 .Python
-env/
-venv/
-ENV/
 build/
 develop-eggs/
 dist/
@@ -23,16 +20,28 @@ wheels/
 .installed.cfg
 *.egg
 
+# Virtual Environment
+venv/
+ENV/
+env/
+django_env/
+.venv
+
 # Django
 *.log
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
-staticfiles/
-media/
-*.db
+/staticfiles/
+/media/
+__pycache__
 
-# IDEs
+# Environment Variables
+.env
+.env.local
+.env.*.local
+
+# IDE
 .vscode/
 .idea/
 *.swp
@@ -41,28 +50,88 @@ media/
 
 # OS
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
-
-# Environment
-.env
-.env.local
 
 # Celery
 celerybeat-schedule
+celerybeat.pid
 
-# Coverage
-htmlcov/
+# Redis
+dump.rdb
+
+# Testing
+.pytest_cache/
 .coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
+htmlcov/
+
+# Production
+*.pyc
+*.pyo
+*.pyd
+manage.pyc
+
+# Node / Frontend
+node_modules/
+.npm/
+.pnpm-store/
+.yarn/
+.yarn/cache/
+.yarnrc.yml
+.turbo/
+.parcel-cache/
+.vite/
+.next/
+.nuxt/
+.storybook-out/
+
+# CSS/JS build outputs
+/static/build/
+*.map
+
+# Python tooling caches
+.mypy_cache/
+.ruff_cache/
+.pytype/
+.pyre/
+.tox/
+.nox/
 .hypothesis/
 
-# Project specific
-logs/
+# SQLite auxiliary files
+*.sqlite3-wal
+*.sqlite3-shm
+
+# Django artifacts
+/media/*
+!/media/.gitkeep
+/staticfiles/*
+!/staticfiles/.gitkeep
+
+# Temp/backup migration folders
+**/migrations_backup_temp/
+**/migrations_new/
+
+# Data dumps & large local datasets
+/data/
 *.csv
-*.xlsx
-uploads/
+*.tsv
+*.parquet
+*.arrow
+*.feather
+*.db
+*.sqlite
+
+# Logs
+logs/
+*.log.*
+
+# Misc caches and temp
+.cache/
+.tmp/
+tmp/
 

@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Progress Tracker - Contact Manager{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/loading.css' %}">
+<link rel="stylesheet" href="{% static 'css/animations.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="text-white mb-2">
+                    <i class="fas fa-chart-line"></i> Progress Tracker
+                </h1>
+                <p class="text-white-50 mb-0">Track overall project completion and task progress</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <button @click="refreshData()" 
+                        class="btn btn-light btn-lg me-2"
+                        :disabled="isLoading">
+                    <i class="fas fa-sync-alt" :class="{'fa-spin': isLoading}"></i> Refresh
+                </button>
+                <button @click="exportProgress()" 
+                        class="btn btn-outline-light btn-lg">
+                    <i class="fas fa-download"></i> Export
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid mt-4" x-data="progressTracker()">
+    <!-- Overall Progress Card -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-gradient-primary text-white">
+            <h5 class="mb-0">
+                <i class="fas fa-trophy me-2"></i>
+                Overall Project Progress
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <div class="progress mb-3" style="height: 30px;">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-gradient-primary" 
+                             role="progressbar" 
+                             :style="'width: ' + overallProgress + '%'">
+                            <span class="fw-bold fs-6" x-text="overallProgress.toFixed(1) + '%'"></span>
+                        </div>
+                    </div>
+                    <p class="text-muted mb-0">
+                        <span x-text="completedTasks"></span> of <span x-text="totalTasks"></span> tasks completed
+                    </p>
+                </div>
+                <div class="col-md-4 text-center">
+                    <div class="row">
+                        <div class="col-4">
+                            <div class="stat-item">
+                                <div class="stat-number text-primary" x-text="totalTasks"></div>
+                                <div class="stat-label">Total</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat-item">
+                                <div class="stat-number text-success" x-text="completedTasks"></div>
+                                <div class="stat-label">Done</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat-item">
+                                <div class="stat-number text-warning" x-text="remainingTasks"></div>
+                                <div class="stat-label">Left</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Categories Grid -->
+    <div class="row">
+        <template x-for="category in categories" :key="category.name">
+            <div class="col-lg-6 col-xl-4 mb-4">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-header" :style="'background-color: ' + category.color + '; color: white;'">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <i :class="category.icon + ' me-2'"></i>
+                                <h6 class="mb-0" x-text="category.name"></h6>
+                            </div>
+                            <span class="badge bg-light text-dark" x-text="category.completion_percentage + '%'"></span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <!-- Progress Bar -->
+                        <div class="progress mb-3" style="height: 20px;">
+                            <div class="progress-bar" 
+                                 :style="'width: ' + category.completion_percentage + '%; background-color: ' + category.color"
+                                 role="progressbar">
+                                <span class="fw-bold" x-text="category.completion_percentage + '%'"></span>
+                            </div>
+                        </div>
+                        
+                        <!-- Stats -->
+                        <div class="row text-center mb-3">
+                            <div class="col-6">
+                                <div class="stat-item">
+                                    <div class="stat-number" :style="'color: ' + category.color" x-text="category.completed_tasks_count"></div>
+                                    <div class="stat-label">Completed</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="stat-item">
+                                    <div class="stat-number text-muted" x-text="category.total_tasks_count"></div>
+                                    <div class="stat-label">Total</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Tasks List -->
+                        <div class="tasks-list">
+                            <template x-for="task in getTasksForCategory(category.name)" :key="task.id">
+                                <div class="task-item d-flex align-items-center py-2 border-bottom">
+                                    <div class="form-check me-3">
+                                        <input class="form-check-input checkbox-animate" 
+                                               type="checkbox" 
+                                               :checked="task.is_completed"
+                                               @change="toggleTask(task.id)">
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <div class="task-name" 
+                                             :class="{'text-decoration-line-through text-muted': task.is_completed}"
+                                             x-text="task.task_name"></div>
+                                        <div class="task-meta">
+                                            <span class="badge me-2" 
+                                                  :class="getPriorityClass(task.priority)"
+                                                  x-text="task.priority"></span>
+                                            <small class="text-muted" x-text="task.description"></small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                        
+                        <!-- Expand/Collapse Button -->
+                        <div class="text-center mt-3">
+                            <button class="btn btn-outline-secondary btn-sm" 
+                                    @click="toggleCategory(category.name)"
+                                    x-text="expandedCategories.includes(category.name) ? 'Show Less' : 'Show All Tasks'">
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <!-- Loading State -->
+    <div x-show="isLoading" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="text-muted mt-3">Loading progress data...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div x-show="!isLoading && categories.length === 0" class="text-center py-5">
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                <i class="fas fa-chart-line fa-3x text-muted"></i>
+            </div>
+            <div class="empty-state-title">No Progress Data</div>
+            <div class="empty-state-text">
+                No task categories or progress data found. Contact an administrator to set up the progress tracker.
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/progress-tracker.js' %}"></script>
+<script>
+// Initialize progress tracker
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof Alpine !== 'undefined') {
+        Alpine.data('progressTracker', progressTracker);
+    }
+});
+</script>
+{% endblock %}
